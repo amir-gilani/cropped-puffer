@@ -8,14 +8,16 @@ const NAV_ITEMS = [
   { label: 'About us', view: 'about' },
 ]
 
-/** `activeNavRef` marks the docking slot the outgoing jacket flies into. */
-// The header lives on the first screen only, so it is only ever read from
-// there: the highlight belongs on that section and never moves. Tracking the
-// scroll instead just meant watching the pill slide back on the way up.
-const HERE = 'overview'
-
+/**
+ * `activeNavRef` marks the docking slot the outgoing jacket flies into, and
+ * `here` is the section the reader is on, which the white pill follows.
+ *
+ * The header belongs to the first screen and leaves with it, so what the pill
+ * is really animating is the trip: it slides off Overview as a nav item is
+ * pressed and the page scrolls away, and slides back as the page returns.
+ */
 const Header = forwardRef(function Header(
-  { cartCount, cartOpen, onCartClick, onNavigate },
+  { cartCount, cartOpen, onCartClick, onNavigate, here },
   activeNavRef,
 ) {
   return (
@@ -34,10 +36,10 @@ const Header = forwardRef(function Header(
             className={styles.navItem}
             type="button"
             disabled={!item.view}
-            aria-current={item.view === HERE ? 'page' : undefined}
+            aria-current={item.view === here ? 'page' : undefined}
             onClick={() => item.view && onNavigate(item.view)}
           >
-            {item.view === HERE && (
+            {item.view === here && (
               // One element shared across the items, so it slides between them
               // rather than disappearing here and reappearing there.
               <motion.span

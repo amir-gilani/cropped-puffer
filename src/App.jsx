@@ -39,6 +39,8 @@ export default function App() {
   const [size, setSize] = useState(36)
   const [cart, setCart] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
+  // The section the reader is on, and so the nav item the white pill sits under.
+  const [here, setHere] = useState('overview')
   // Docking geometry measured at click time and handed to the exiting jacket
   // through AnimatePresence's `custom`, so it never goes stale mid-swap.
   const [swap, setSwap] = useState({
@@ -69,6 +71,11 @@ export default function App() {
     const decode = (jacket) => {
       const preload = new Image()
       preload.src = jacket
+      // Fetching is not decoding. Left at the fetch, the first paint of a
+      // colourway still pays to turn 800KB of PNG into a bitmap, and that bill
+      // arrives on the frame it is first shown -- which is mid-swap, on the
+      // thread running the swap. Decoding here moves it off that frame.
+      preload.decode?.().catch(() => {})
     }
     themeStates.slice(0, 2).forEach(({ jacket }) => decode(jacket))
 
@@ -88,7 +95,13 @@ export default function App() {
    */
   const measure = useCallback(() => {
     const stage = stageRef.current?.getBoundingClientRect()
-    const thumb = thumbRef.current?.getBoundingClientRect()
+    // The corner's *image*, not the button around it. They are not the same
+    // rectangle: the button is 77.75 x 72 and the image inside it draws
+    // 77.75 x 73.5, half a pixel lower. Measured against the button, the
+    // jacket landed 2% small and slightly high, and the hand-over -- which
+    // swaps one for the other in a single frame -- flicked.
+    const image = thumbRef.current?.querySelector('img')
+    const thumb = image?.getBoundingClientRect()
     const nav = navRef.current?.getBoundingClientRect()
     const cx = stage ? stage.left + stage.width / 2 : window.innerWidth / 2
     const cy = stage ? stage.top + stage.height / 2 : window.innerHeight / 2
@@ -98,7 +111,6 @@ export default function App() {
     // jacket near the thumbnail's size but not exactly on it, so compare the
     // fitted image rects instead. Both are centred in their box, so only the
     // size needs the correction -- the centres already line up.
-    const image = thumbRef.current?.querySelector('img')
     const ratio =
       image?.naturalWidth && image?.naturalHeight
         ? image.naturalWidth / image.naturalHeight
@@ -279,7 +291,31 @@ export default function App() {
     }
   }, [])
 
+  // Which section the reader is on, which is what the header's white pill sits
+  // under. Set on the click as well as by the observer, so the pill leaves the
+  // instant an item is pressed rather than a smooth scroll later.
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll('[data-section]'))
+    if (!sections.length) return undefined
+    const names = ['overview', 'performance', 'about']
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          const name = names[sections.indexOf(entry.target)]
+          if (name) setHere(name)
+        })
+      },
+      // Half a screen: every section is a whole viewport, so only one of them
+      // can hold that much at a time.
+      { threshold: 0.5 },
+    )
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [])
+
   const goTo = useCallback((target) => {
+    setHere(target)
     const section = { performance: performanceRef, about: aboutRef }[target]
     if (section) section.current?.scrollIntoView({ behavior: 'smooth' })
     else window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -309,7 +345,9 @@ export default function App() {
       // until it is gone: `onExitComplete` swaps one for the other on the frame
       // the jacket is removed. Earlier versions had the thumbnail arrive first
       // and juggle shadows underneath it, but two elements in one spot means
-      // two shadows, two clocks and two chances to pulse. One at a time cannot.
+      // two shadows, two clocks and two chances to pulse. One at a time cannot
+      // -- and putting the thumbnail up mid-flight also lands the new image's
+      // decode in the middle of the animation, which is a stutter you can feel.
       timersRef.current = [
         direction > 0 &&
           setTimeout(() => {
@@ -373,6 +411,7 @@ export default function App() {
         <Header
           ref={navRef}
           onNavigate={goTo}
+          here={here}
           cartCount={cartCount}
           cartOpen={cartOpen}
           onCartClick={() => setCartOpen((open) => !open)}
@@ -402,10 +441,16 @@ export default function App() {
           total={themeStates.length}
         />
 
+        {/* On the last colourway there is nothing left to bring in, so the
+            corner holds nothing: showing the one *behind* you there says the
+            arrow will go forward when it can only go back. It stays mounted
+            and merely invisible, because this is also the slot a jacket lands
+            in on the way back -- unmounted, there would be no rectangle to
+            measure and it would fly off the screen instead. */}
         <ColorThumbnail
           ref={thumbRef}
           theme={themeStates[previewIndex]}
-          hidden={thumbHidden}
+          hidden={thumbHidden || index === themeStates.length - 1}
           fadeIn={thumbFadeIn}
           fadeOut={thumbFadeOut}
           onClick={() => step(previewIndex > index ? 1 : -1)}

@@ -17,11 +17,11 @@
   /* This has to match the centre jacket's own shadow *as it appears when it has
      landed here*, because the hand-over swaps one for the other in a single
      frame. The jacket carries drop-shadow(0 24px 34px) and arrives scaled by
-     thumbnail width / stage width -- around 0.17 at these sizes -- so 24 and 34
-     become roughly 4 and 6. It was still set for a thumbnail half again as wide
-     as this one, which is why the shadow jumped at the swap.
+     thumbnail width / stage width -- 77.73 / 408 = 0.1905 at these sizes -- so
+     24 and 34 become 4.6 and 6.5. Rounded to 4 and 6, as they were, the corner
+     lightened a shade on the frame the swap happened.
      Re-derive these two numbers whenever either element is resized. */
-  filter: drop-shadow(0 4px 6px var(--shadow));
+  filter: drop-shadow(0 4.6px 6.5px var(--shadow));
   transition: filter 700ms ease 150ms;
   user-select: none;
 }

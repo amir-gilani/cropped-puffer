@@ -12,7 +12,10 @@ import styles from './ColorThumbnail.module.css'
  * pop the moment the arriving jacket hands over, since that jacket has already
  * come to rest at this exact size and position.
  */
-const ColorThumbnail = forwardRef(function ColorThumbnail({ theme, hidden, fadeIn, fadeOut, onClick }, ref) {
+const ColorThumbnail = forwardRef(function ColorThumbnail(
+  { theme, hidden, fadeIn, fadeOut, onClick },
+  ref,
+) {
   return (
     <motion.button
       type="button"
@@ -20,6 +23,13 @@ const ColorThumbnail = forwardRef(function ColorThumbnail({ theme, hidden, fadeI
       className={styles.thumb}
       onClick={onClick}
       aria-label={`Preview ${theme.name}`}
+      // Invisible is not gone: an element at zero opacity still takes clicks
+      // and still answers the Tab key, and this one is left standing whenever
+      // there is nothing to preview -- so it has to be taken out of reach as
+      // well as out of sight, or the empty corner steps the colourway.
+      aria-hidden={hidden || undefined}
+      tabIndex={hidden ? -1 : 0}
+      style={{ pointerEvents: hidden ? 'none' : 'auto' }}
       initial={false}
       animate={{ opacity: hidden ? 0 : 1 }}
       // `fadeIn` of 0 means it appears on the very next frame -- the caller

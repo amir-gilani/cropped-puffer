@@ -142,7 +142,7 @@
   writing-mode: vertical-rl;
 }
 
-/* --- registration, callout, caption ------------------------------------ */
+/* --- registration and caption ------------------------------------------ */
 
 /* Crop marks at the corners of the artwork, the way a plate is registered for
    print: two sides of a corner each, held off the picture so they mark it
@@ -195,51 +195,6 @@
 .cropBR {
   border-bottom-width: 1px;
   border-right-width: 1px;
-}
-
-/* The leader runs from a point on the garment up to a fixed distance above it.
-   Its length is therefore how far back to the top edge, plus that clearance --
-   so the label lands in open ground however tall the picture is drawn. */
-.callout {
-  --clear: clamp(18px, 3vh, 30px);
-  position: absolute;
-  left: calc(var(--dx) + var(--dw) * var(--ax));
-  top: calc(var(--dy) - var(--clear));
-  width: 1px;
-  height: calc(var(--dh) * var(--ay) + var(--clear));
-  background: color-mix(in srgb, var(--text) 30%, transparent);
-  transform-origin: bottom center;
-  transition: background-color 700ms ease 150ms;
-}
-
-/* On the garment, at the end of the leader. */
-.calloutDot {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--text) 46%, transparent);
-  transform: translate(-50%, 50%);
-  transition: border-color 700ms ease 150ms;
-}
-
-/* Above the line's free end and to the right of it, the way a leader is
-   annotated: text centred on the line would look like a title for the whole
-   drawing rather than a note about one seam. */
-.calloutLabel {
-  position: absolute;
-  left: 4px;
-  bottom: 100%;
-  margin-bottom: 4px;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--muted);
-  transition: color 700ms ease 150ms;
 }
 
 /* The plate's own line of type, under the width it belongs to and ranged with
@@ -410,11 +365,10 @@
     top: calc(var(--dy) + var(--dh) + 28px);
   }
 
-  /* The height line and the leader both need a margin beside the garment that
-     a narrow screen does not have. The width line and the caption sit under
-     the picture, where there is still room. */
-  .spanHeight,
-  .callout {
+  /* The height line needs a margin beside the garment that a narrow screen
+     does not have. The width line and the caption sit under the picture, where
+     there is still room. */
+  .spanHeight {
     display: none;
   }
 
@@ -437,15 +391,8 @@
 .spanWidth,
 .figure,
 .crop,
-.callout,
-.calloutDot,
-.calloutLabel,
 .caption {
   opacity: 0;
-}
-
-.callout {
-  transform: scaleY(0);
 }
 
 .spanHeight {
@@ -491,32 +438,11 @@
   animation-delay: 150ms;
 }
 
-/* Out of the garment rather than down onto it: the leader belongs to the seam
-   it starts at, so it grows from the dot. */
-.shown .callout {
-  animation: growUp 460ms cubic-bezier(0.16, 1, 0.3, 1) 300ms forwards;
-}
-
-.shown .calloutDot {
-  animation: appear 240ms ease-out 260ms forwards;
-}
-
-.shown .calloutLabel {
-  animation: appear 320ms ease-out 700ms forwards;
-}
-
 .shown .caption {
   animation: appear 400ms ease-out 780ms forwards;
 }
 
 @keyframes growDown {
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-}
-
-@keyframes growUp {
   to {
     opacity: 1;
     transform: scaleY(1);
@@ -550,18 +476,9 @@
   .spanWidth,
   .figure,
   .crop,
-  .callout,
-  .calloutDot,
-  .calloutLabel,
   .caption {
     opacity: 1;
     transform: none;
     animation: none;
-  }
-
-  /* The dot is centred on the end of its leader by a transform, so it is the
-     one thing here that cannot simply have it removed. */
-  .calloutDot {
-    transform: translate(-50%, 50%);
   }
 }

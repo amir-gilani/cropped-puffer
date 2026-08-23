@@ -18,9 +18,26 @@
   flex-direction: column;
   width: min(360px, 100vw);
   padding: clamp(18px, 3vw, 28px);
+  /* Less on the right than on the left. The left edge is a drawn one -- a
+     rounded border with the page behind it -- so it needs the full margin to
+     sit off; the right runs into the edge of the screen, where the same figure
+     reads as a gap nothing accounts for. Everything ranged right (the price,
+     the cross, the total, the button) moves out with it.
+
+     16px rather than a round 10: it is where the fixed frame's corner marks sit
+     (`clamp(9px, 1.1vw, 16px)` in App.module.css), so the drawer's right-hand
+     column stands on a line the page already draws. Tighter than that and the
+     content starts to look pushed off the edge of the screen. */
+  padding-right: 16px;
   border-radius: 24px 0 0 24px;
-  border: 1px solid var(--text);
-  border-right: 0;
+  /* The left edge only. The drawer is the full height of the screen, so its top
+     and bottom borders lay a hairline along the top and bottom edges of the
+     page -- not the side of a drawer, just a line across the screen. On cream
+     it is a dark line on a light ground and easy to miss; on the four dark
+     colourways the same mix is a *light* line on a dark ground, and it is the
+     first thing you see when the cart opens. */
+  border: 0 solid var(--text);
+  border-left-width: 1px;
   /* Hairlines mixed out of the text colour, so the panel belongs to whichever
      theme is on screen instead of being a grey box laid over all of them. */
   border-color: color-mix(in srgb, var(--text) 14%, transparent);
@@ -104,6 +121,13 @@
   border-top-color: color-mix(in srgb, var(--text) 10%, transparent);
 }
 
+/* The rule divides one item from the next, so the first item has none: drawn
+   there it sits directly under the header and reads as a line belonging to it,
+   which also means it appears and disappears with the cart's contents. */
+.line:first-child {
+  border-top: 0;
+}
+
 .thumb {
   width: 42px;
   height: 42px;
@@ -142,6 +166,13 @@
   height: 20px;
   border-radius: 50%;
   flex: none;
+  /* The cross is 11px inside a 20px hit area, so aligning the button with the
+     content edge leaves the mark itself sitting short of it -- and the total,
+     the price beside it and the checkout button all reach that edge, which is
+     what makes the gap read as a mistake. Pulled out by half the difference,
+     so the glyph lines up and the circle that appears on hover simply runs a
+     few pixels into the drawer's padding. */
+  margin-right: -4px;
   color: var(--muted);
   transition: background-color 200ms ease, color 200ms ease;
 }

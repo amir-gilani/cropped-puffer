@@ -21,18 +21,6 @@ const FIGURES = [
   { label: 'Repair', value: '5', unit: 'yr', note: 'Free, whatever happened' },
 ]
 
-/**
- * Where the callout points, as a fraction of the drawn artwork rather than of
- * the screen, so it stays on the same seam at any size. Its leader runs up out
- * of the garment and stops at a fixed height above it -- the length is the
- * distance back to the top edge, not a fixed number, so the label always
- * clears the picture.
- *
- * One, not three. The six figures on the right already carry every number
- * there is; this names the one thing on the garment that has no number.
- */
-const CALLOUT = { at: [0.44, 0.34], label: 'Box-wall baffles' }
-
 export default function PerformanceView({ theme }) {
   // One observer and a class, rather than an animation library instance per
   // element. These are one-shot reveals of transform and opacity, which CSS
@@ -160,16 +148,6 @@ export default function PerformanceView({ theme }) {
             <div className={styles.spanWidth}>
               <span className={styles.spanLabel}>58 cm</span>
             </div>
-
-            {/* A dot on the garment and a leader up to the name of what it is
-                pointing at. */}
-            <span
-              className={styles.callout}
-              style={{ '--ax': CALLOUT.at[0], '--ay': CALLOUT.at[1] }}
-            >
-              <i className={styles.calloutDot} />
-              <span className={styles.calloutLabel}>{CALLOUT.label}</span>
-            </span>
 
             <figcaption className={styles.caption}>Fig. 01 — size 38, laid flat</figcaption>
           </>
