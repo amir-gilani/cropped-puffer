@@ -27,7 +27,7 @@ const OUT_WIDTH = 1120
 // real evenly lit backdrop, 'noisy' for one whose transparency was flattened
 // into speckle and banding. All four stay supported.
 const SOURCES = [
-  ['upscalemedia-transformed.png', 'jacket', 'alpha'],
+  ['assets-source/jacket-source.png', 'jacket', 'alpha'],
 ]
 
 /**
