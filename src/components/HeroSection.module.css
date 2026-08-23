@@ -1,0 +1,84 @@
+.hero {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 400px;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 clamp(16px, 2.6vh, 26px);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* A display lockup, not a headline: set as large as the column allows, with
+   the leading closed right up so the two words read as one block. */
+.heading {
+  margin: 0;
+  font-size: clamp(46px, 6vw, 92px);
+  line-height: 0.8;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  transition: color 700ms ease 150ms;
+}
+
+/* The second word is drawn as an outline. Weight and size stay identical, so
+   the pair still reads as one lockup -- only the fill changes, which is what
+   makes it look deliberate rather than like two different treatments. */
+.outline {
+  color: transparent;
+  -webkit-text-stroke: 1.6px var(--text);
+  /* The stroke is a paint, not a colour property, so it needs its own
+     transition to keep pace with the theme. */
+  transition: -webkit-text-stroke-color 700ms ease 150ms;
+}
+
+/* Where the stroke is unsupported, transparent text would simply vanish, so
+   fall back to a dimmed solid word. */
+@supports not (-webkit-text-stroke: 1px currentColor) {
+  .outline {
+    color: var(--text);
+    opacity: 0.32;
+  }
+}
+
+/* One line, three facts, full stops between them. Short enough to be taken in
+   at a glance, which a paragraph never is at this size. */
+.line {
+  margin: clamp(18px, 3vh, 28px) 0 0;
+  font-size: clamp(10.5px, 0.78vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    align-items: center;
+    order: 2;
+    text-align: center;
+  }
+
+  .eyebrow {
+    justify-content: center;
+  }
+}

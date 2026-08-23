@@ -1,0 +1,59 @@
+/* Anchored to the bottom-left corner, level with the corner preview opposite. */
+.stepper {
+  position: absolute;
+  left: clamp(18px, 3vw, 48px);
+  bottom: clamp(22px, 4vh, 44px);
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--text);
+  border-color: color-mix(in srgb, var(--text) 14%, transparent);
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  transition: background-color 700ms ease 150ms, border-color 700ms ease 150ms;
+}
+
+.step {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text);
+  transition: background-color 200ms ease, color 700ms ease 150ms, opacity 250ms ease;
+}
+
+.step:hover:not(:disabled) {
+  background: var(--panel);
+}
+
+.step:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.counter {
+  padding: 0 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  /* Fixed-width figures, so stepping through does not shuffle the line. */
+  font-variant-numeric: tabular-nums;
+  transition: color 700ms ease 150ms;
+}
+
+.slash {
+  font-style: normal;
+  opacity: 0.35;
+  margin: 0 3px;
+}
+
+@media (max-width: 900px) {
+  .stepper {
+    position: static;
+    order: 4;
+    margin: 0 auto;
+  }
+}

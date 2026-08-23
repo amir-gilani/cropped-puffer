@@ -1,0 +1,137 @@
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 3;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wordmark {
+  /* Set as a name, not a heading: caps, heavy, and widely tracked, so it holds
+     the corner at a size that never competes with the price or the headline. */
+  font-size: clamp(11px, 0.95vw, 13.5px);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* Same trailing-space trim, so the wordmark starts flush with the edge it is
+     aligned to. */
+  margin-right: -0.22em;
+  transition: color 700ms ease 150ms;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 999px;
+  background: var(--nav-bar);
+  backdrop-filter: blur(8px);
+  transition: background-color 700ms ease 150ms;
+}
+
+.navItem {
+  position: relative;
+  padding: 8px 15px;
+  border-radius: 999px;
+  font-size: clamp(8.5px, 0.65vw, 10px);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  color: var(--nav-text);
+  transition: color 700ms ease 150ms, opacity 250ms ease;
+}
+
+/* Dimmed until picked -- and never dimmed while the white pill is under it. */
+.navItem:not([aria-current]) {
+  opacity: 0.7;
+}
+
+.navItem:not([aria-current]):hover {
+  opacity: 1;
+}
+
+/* The white pill itself, moved between items by a shared layout animation. */
+.navPill {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.navLabel {
+  position: relative;
+  z-index: 1;
+  /* Letter-spacing is added *after* every letter, including the last one, so a
+     tracked label sits visibly left of centre inside its pill. Pulling the
+     trailing space back off the end re-centres it. */
+  margin-right: -0.16em;
+}
+
+.navItem[aria-current] .navLabel {
+  color: #141416;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.iconButton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--text);
+  transition: background-color 700ms ease 150ms, color 700ms ease 150ms, transform 200ms ease;
+}
+
+.iconButton:hover {
+  transform: translateY(-2px);
+}
+
+/* Held open: the button keeps the pressed look while its panel is showing. */
+.iconButtonOn {
+  background: #ffffff;
+  color: #141416;
+}
+
+.badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  /* Fixed colours: a count has to stay legible on every theme. */
+  background: #ffffff;
+  color: #141416;
+  font-size: 9px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .nav {
+    display: none;
+  }
+}

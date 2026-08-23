@@ -1,0 +1,39 @@
+.thumb {
+  position: absolute;
+  right: clamp(18px, 3vw, 48px);
+  bottom: clamp(22px, 4vh, 44px);
+  z-index: 4;
+  width: clamp(58px, 5.4vw, 78px);
+  height: clamp(54px, 5vw, 73px);
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Covered by the jacket that just landed here: its shadow is the one on show,
+   so this one steps aside rather than stacking with it. The two are matched, so
+   handing the shadow back over when the jacket is removed is invisible. */
+.covered img {
+  filter: none;
+  /* Steps, never eases. The img below carries a filter transition for theme
+     colour changes, and letting it run here would drag the shadow back in over
+     700ms instead of at the instant the jacket is removed. */
+  transition: none;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Roughly the centre jacket's shadow scaled down by the same factor, so the
+     handover at the end of a swap does not pop. */
+  filter: drop-shadow(0 7px 10px var(--shadow));
+  transition: filter 700ms ease 150ms;
+  user-select: none;
+}
+
+@media (max-width: 900px) {
+  .thumb {
+    display: none;
+  }
+}

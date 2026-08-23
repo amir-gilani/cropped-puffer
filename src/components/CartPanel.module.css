@@ -1,0 +1,191 @@
+/* Dims the page and swallows the click that would otherwise land behind. */
+.catcher {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* A full-height drawer on the right edge. Only the inner corners are rounded,
+   because the outer ones run off the screen. */
+.panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, 100vw);
+  padding: clamp(18px, 3vw, 28px);
+  border-radius: 24px 0 0 24px;
+  border: 1px solid var(--text);
+  border-right: 0;
+  /* Hairlines mixed out of the text colour, so the panel belongs to whichever
+     theme is on screen instead of being a grey box laid over all of them. */
+  border-color: color-mix(in srgb, var(--text) 14%, transparent);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  transition: background-color 700ms ease 150ms, border-color 700ms ease 150ms;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+}
+
+.headRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--text);
+  background: var(--panel);
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+
+.close:hover {
+  transform: scale(1.08);
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.count,
+.lineMeta,
+.totalLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.empty {
+  margin: 0;
+  flex: 1;
+  padding: 18px 0 22px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* Takes whatever height is left, so the total and the button stay pinned to the
+   bottom of the drawer however many lines there are. */
+.lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  border-top: 1px solid var(--text);
+  border-top-color: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.thumb {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  margin: 8px 0;
+  flex: none;
+}
+
+.lineText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.lineName {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.linePrice {
+  font-size: 11.5px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.remove {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex: none;
+  color: var(--muted);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.remove:hover {
+  background: var(--panel);
+  color: var(--text);
+}
+
+.foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-top: 1px solid var(--text);
+  border-top-color: color-mix(in srgb, var(--text) 14%, transparent);
+}
+
+.total {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fixed white styling -- it carries its own contrast on every theme. */
+.checkout {
+  width: 100%;
+  padding: 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #141416;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.checkout:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.checkout:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

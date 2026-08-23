@@ -1,0 +1,126 @@
+.card {
+  position: relative;
+  z-index: 2;
+  justify-self: end;
+  width: 100%;
+  max-width: 258px;
+  padding: 4px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--text);
+  /* A hairline mixed out of the text colour, so the card belongs to whichever
+     theme is on screen instead of being a grey box laid over all of them. */
+  border-color: color-mix(in srgb, var(--text) 14%, transparent);
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  transition: background-color 700ms ease 150ms, border-color 700ms ease 150ms;
+}
+
+/* Label left, value right, one fact per line -- and a rule between each pair,
+   which is what makes four unrelated facts read as one sheet. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 52px;
+  border-top: 1px solid var(--text);
+  border-top-color: color-mix(in srgb, var(--text) 12%, transparent);
+  transition: border-color 700ms ease 150ms;
+}
+
+.row:first-child {
+  border-top: 0;
+}
+
+.label {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.value {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: color 700ms ease 150ms;
+}
+
+.prices {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.price,
+.oldPrice,
+.value {
+  display: inline-block;
+}
+
+.price {
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  /* Fixed-width figures, so the price cannot jitter if it ever changes. */
+  font-variant-numeric: tabular-nums;
+  transition: color 700ms ease 150ms;
+}
+
+.oldPrice {
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-decoration: line-through;
+  /* A hairline strike reads as a mark on the number; the default weight reads
+     as a mistake. */
+  text-decoration-thickness: 1px;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.sizes {
+  display: flex;
+  gap: 6px;
+}
+
+.size,
+.sizeActive {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: transform 200ms ease;
+}
+
+.size:hover,
+.sizeActive:hover {
+  transform: scale(1.08);
+}
+
+/* Fixed styling: the size chips never follow the theme. */
+.size {
+  background: #1c1c1f;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.sizeActive {
+  background: #ffffff;
+  color: #141416;
+}
+
+@media (max-width: 900px) {
+  .card {
+    order: 3;
+    justify-self: center;
+    max-width: 320px;
+  }
+}

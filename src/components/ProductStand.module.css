@@ -1,0 +1,144 @@
+.stand {
+  /* Above the side columns, so a jacket in flight passes in front of the
+     heading -- but below the header, so it tucks behind the nav as it docks. */
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  height: 100%;
+}
+
+.stage {
+  position: relative;
+  /* The artwork is 1120px wide, so a 2x screen maps one image pixel to one
+     device pixel anywhere up to 560 CSS pixels. This is well inside that, with
+     room left to grow again without costing any sharpness. */
+  width: min(100%, 408px);
+  height: min(60vh, 476px);
+  flex: 0 1 auto;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Optically centred, not geometrically. The jacket's mass sits low -- wide
+     sleeves and hem at the bottom, a narrow hood at the top -- so rings centred
+     on the box leave what looks like too much air above it. Dropping them a
+     little puts them around the garment instead of around the container. */
+  transform: translateY(3.5%);
+  pointer-events: none;
+}
+
+/* An outer hairline, well outside the disc. Two rings at different weights read
+   as depth; one ring on its own reads as a border. */
+.ringOuter {
+  position: absolute;
+  width: 138%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--text);
+  border-color: color-mix(in srgb, var(--text) 7%, transparent);
+  transition: border-color 700ms ease 150ms;
+}
+
+/* The disc and its ring, one element: the fill lifts the jacket off the
+   background, the border draws the edge of the stage it stands on. */
+.ring {
+  width: 106%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--text);
+  border-color: color-mix(in srgb, var(--text) 13%, transparent);
+  background: color-mix(in srgb, var(--text) 3.5%, transparent);
+  transition: border-color 700ms ease 150ms, background-color 700ms ease 150ms;
+}
+
+.jacket {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 24px 34px var(--shadow));
+  transition: filter 700ms ease 150ms;
+  user-select: none;
+}
+
+.buy {
+  position: absolute;
+  left: 50%;
+  /* Well below the stage box, so it sits clear of the hem rather than tucked
+     under it. */
+  bottom: -74px;
+  transform: translateX(-50%);
+  /* Over the jacket, including one in flight. */
+  z-index: 3;
+  /* Fixed width and centred content: the label changes, the button must not.
+     Letting it resize around the text made the pill jump sideways at the exact
+     moment it was meant to confirm something. */
+  display: grid;
+  place-items: center;
+  /* Sized to the longer of the two labels ("In cart", with its tick) plus its
+     padding -- no more, so the fixed width costs nothing. */
+  min-width: 126px;
+  height: 36px;
+  padding: 0 20px;
+  overflow: hidden;
+  border-radius: 999px;
+  /* Fixed white styling -- it carries its own contrast on every theme. */
+  background: #ffffff;
+  color: #141416;
+  /* Small caps-height type needs the tracking opened up to stay readable, which
+     also makes a small button look deliberate rather than shrunken. */
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+
+.buyLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  /* The trailing letter-space would otherwise push the label off centre. */
+  margin-right: -0.12em;
+}
+
+.buy:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+}
+
+/* The soft blurred pool the jacket appears to hover over. */
+.glow {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: 58%;
+  height: 8%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--shadow);
+  filter: blur(26px);
+  opacity: 0.75;
+  transition: background-color 700ms ease 150ms;
+}
+
+@media (max-width: 900px) {
+  .stand {
+    order: 1;
+  }
+
+  .stage {
+    height: 42vh;
+  }
+}
