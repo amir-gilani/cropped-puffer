@@ -55,8 +55,15 @@
   opacity: 0.7;
 }
 
-.navItem:not([aria-current]):hover {
+.navItem:not([aria-current]):hover:not(:disabled) {
   opacity: 1;
+}
+
+/* A section that does not exist yet, shown as plainly unavailable rather than
+   as a link that goes nowhere. */
+.navItem:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
 }
 
 /* The white pill itself, moved between items by a shared layout animation. */

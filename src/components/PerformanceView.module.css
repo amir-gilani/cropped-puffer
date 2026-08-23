@@ -1,0 +1,229 @@
+.view {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(300px, 1fr);
+  align-items: center;
+  gap: clamp(28px, 6vw, 90px);
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  min-height: 0;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 clamp(16px, 2.6vh, 26px);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* The same display lockup the overview uses, so the two views read as one
+   site: identical size and weight, only the fill differs. */
+.heading {
+  margin: 0;
+  font-size: clamp(30px, 3.6vw, 54px);
+  line-height: 0.88;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  transition: color 700ms ease 150ms;
+}
+
+.outline {
+  color: transparent;
+  -webkit-text-stroke: 1.6px var(--text);
+  /* The stroke is a paint, not a colour property, so it needs its own
+     transition to keep pace with the theme. */
+  transition: -webkit-text-stroke-color 700ms ease 150ms;
+}
+
+@supports not (-webkit-text-stroke: 1px currentColor) {
+  .outline {
+    color: var(--text);
+    opacity: 0.32;
+  }
+}
+
+.scale {
+  width: 100%;
+  max-width: 380px;
+  margin-top: clamp(24px, 4vh, 40px);
+}
+
+.track {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  transition: background-color 700ms ease 150ms;
+}
+
+.comfort {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: var(--text);
+  /* Grows from its own left edge, so it reads as a range being measured out
+     rather than a block fading in. */
+  transform-origin: left center;
+  transition: background-color 700ms ease 150ms;
+}
+
+.scaleLabels {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.comfortLabel {
+  color: var(--text);
+  transition: color 700ms ease 150ms;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(20px, 3.4vh, 34px);
+}
+
+.metrics {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2vh, 18px);
+}
+
+.metric {
+  display: grid;
+  gap: 6px;
+}
+
+.metricHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.metricLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 700ms ease 150ms;
+}
+
+.metricValue {
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  transition: color 700ms ease 150ms;
+}
+
+.bar {
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  transition: background-color 700ms ease 150ms;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--text);
+  transform-origin: left center;
+  transition: background-color 700ms ease 150ms;
+}
+
+.metricNote {
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+/* Facts with no scale to plot, so they are set as a list rather than forced
+   into bars they do not belong in. */
+.materials {
+  margin: 0;
+  padding-top: clamp(14px, 2.4vh, 22px);
+  border-top: 1px solid var(--text);
+  border-top-color: color-mix(in srgb, var(--text) 14%, transparent);
+  transition: border-color 700ms ease 150ms;
+}
+
+.material {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px 0;
+}
+
+.materialLabel {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.materialValue {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+  transition: color 700ms ease 150ms;
+}
+
+@media (max-width: 900px) {
+  .view {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 32px;
+  }
+
+  .intro {
+    align-items: center;
+  }
+
+  .detail {
+    width: 100%;
+    max-width: 420px;
+  }
+}

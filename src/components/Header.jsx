@@ -1,13 +1,20 @@
-import { forwardRef, useState } from 'react'
+import { forwardRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import styles from './Header.module.css'
 
-const NAV_ITEMS = ['OVERVIEW', 'PERFORMANCE', 'ABOUT US']
+// A view of null is a section that does not exist yet: shown, but plainly not
+// available, rather than a link that goes nowhere.
+const NAV_ITEMS = [
+  { label: 'Overview', view: 'overview' },
+  { label: 'Performance', view: 'performance' },
+  { label: 'About us', view: null },
+]
 
 /** `activeNavRef` marks the docking slot the outgoing jacket flies into. */
-const Header = forwardRef(function Header({ cartCount, cartOpen, onCartClick }, activeNavRef) {
-  const [active, setActive] = useState(0)
-
+const Header = forwardRef(function Header(
+  { cartCount, cartOpen, onCartClick, view, onNavigate },
+  activeNavRef,
+) {
   return (
     <header className={styles.header}>
       <div className={styles.brand}>
@@ -17,16 +24,17 @@ const Header = forwardRef(function Header({ cartCount, cartOpen, onCartClick }, 
       <nav className={styles.nav}>
         {NAV_ITEMS.map((item, i) => (
           <button
-            key={item}
+            key={item.label}
             // The jacket always docks into the first item, highlighted or not:
             // that slot is the fixed end of its travel path.
             ref={i === 0 ? activeNavRef : undefined}
             className={styles.navItem}
             type="button"
-            aria-current={i === active ? 'page' : undefined}
-            onClick={() => setActive(i)}
+            disabled={!item.view}
+            aria-current={item.view === view ? 'page' : undefined}
+            onClick={() => item.view && onNavigate(item.view)}
           >
-            {i === active && (
+            {item.view === view && (
               // One element shared across the items, so it slides between them
               // rather than disappearing here and reappearing there.
               <motion.span
@@ -35,7 +43,7 @@ const Header = forwardRef(function Header({ cartCount, cartOpen, onCartClick }, 
                 transition={{ type: 'spring', stiffness: 420, damping: 36 }}
               />
             )}
-            <span className={styles.navLabel}>{item}</span>
+            <span className={styles.navLabel}>{item.label}</span>
           </button>
         ))}
       </nav>

@@ -127,10 +127,18 @@
   border-bottom-right-radius: clamp(12px, 1.4vw, 18px);
 }
 
+/* <main> only centres whatever section is in it; the sections lay themselves
+   out. The animated wrapper has to be a real box -- display: contents would
+   leave nothing for a transform or an opacity to apply to. */
 .main {
   position: relative;
-  /* Above the lighting layers and the grain. */
   z-index: 2;
+  display: grid;
+  align-items: center;
+  min-height: 0;
+}
+
+.columns {
   display: grid;
   /* The outer columns must weigh the same, or the middle one is not actually
      in the middle: at 1fr against 0.8fr its centre sat about 3% of the screen
@@ -138,6 +146,13 @@
   grid-template-columns: minmax(220px, 1fr) minmax(300px, 1.1fr) minmax(220px, 1fr);
   align-items: center;
   gap: clamp(16px, 3vw, 48px);
+  min-height: 0;
+}
+
+.single {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-height: 0;
 }
 

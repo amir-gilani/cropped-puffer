@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import Header from './components/Header.jsx'
 import HeroSection from './components/HeroSection.jsx'
 import Stepper from './components/Stepper.jsx'
 import CartPanel from './components/CartPanel.jsx'
+import PerformanceView from './components/PerformanceView.jsx'
 import ProductStand from './components/ProductStand.jsx'
 import PurchasePanel from './components/PurchasePanel.jsx'
 import ColorThumbnail from './components/ColorThumbnail.jsx'
@@ -37,6 +39,8 @@ export default function App() {
   const [size, setSize] = useState(36)
   const [cart, setCart] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
+  // Which section is on screen. No router: one page, swapped in place.
+  const [view, setView] = useState('overview')
   // Docking geometry measured at click time and handed to the exiting jacket
   // through AnimatePresence's `custom`, so it never goes stale mid-swap.
   const [swap, setSwap] = useState({
@@ -219,30 +223,43 @@ export default function App() {
     >
       <Header
         ref={navRef}
+        view={view}
+        onNavigate={setView}
         cartCount={cartCount}
         cartOpen={cartOpen}
         onCartClick={() => setCartOpen((open) => !open)}
       />
 
       <main className={styles.main}>
-        <HeroSection
-          onPrev={() => step(-1)}
-          onNext={() => step(1)}
-          canPrev={index > 0}
-          canNext={index < themeStates.length - 1}
-          colourway={theme.name}
-          index={index}
-          total={themeStates.length}
-        />
-        <ProductStand
-          theme={theme}
-          themeIndex={index}
-          swap={swap}
-          stageRef={stageRef}
-          onBuy={addToCart}
-          onExitComplete={() => revealCorner(index)}
-        />
-        <PurchasePanel theme={theme} size={size} onSize={setSize} />
+        {/* Keyed on the view, so one section leaves before the next arrives --
+            they occupy the same space and would otherwise overlap mid-change. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={view}
+            className={view === 'overview' ? styles.columns : styles.single}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {view === 'overview' ? (
+              <>
+                <HeroSection />
+                <ProductStand
+                  theme={theme}
+                  themeIndex={index}
+                  swap={swap}
+                  stageRef={stageRef}
+                  onBuy={addToCart}
+                  onExitComplete={() => revealCorner(index)}
+                />
+                <PurchasePanel theme={theme} size={size} onSize={setSize} />
+              </>
+            ) : (
+              <PerformanceView />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <CartPanel
@@ -252,14 +269,17 @@ export default function App() {
         onRemove={removeLine}
       />
 
-      <Stepper
-        onPrev={() => step(-1)}
-        onNext={() => step(1)}
-        canPrev={index > 0}
-        canNext={index < themeStates.length - 1}
-        index={index}
-        total={themeStates.length}
-      />
+      {/* Stepping through colourways only means anything on the overview. */}
+      {view === 'overview' && (
+        <Stepper
+          onPrev={() => step(-1)}
+          onNext={() => step(1)}
+          canPrev={index > 0}
+          canNext={index < themeStates.length - 1}
+          index={index}
+          total={themeStates.length}
+        />
+      )}
 
       {/* Breaks up banding across the big soft gradients. */}
       <div className={styles.grain} aria-hidden="true" />
@@ -277,7 +297,7 @@ export default function App() {
       <ColorThumbnail
         ref={thumbRef}
         theme={themeStates[previewIndex]}
-        hidden={thumbHidden}
+        hidden={thumbHidden || view !== 'overview'}
         fadeIn={thumbFadeIn}
         fadeOut={thumbFadeOut}
         onClick={() => step(previewIndex > index ? 1 : -1)}
