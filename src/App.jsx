@@ -264,6 +264,16 @@ export default function App() {
       {/* Breaks up banding across the big soft gradients. */}
       <div className={styles.grain} aria-hidden="true" />
 
+      {/* Corner marks rather than a closed border: the eye completes the
+          rectangle on its own, so the page is framed without a line being drawn
+          across every edge. Tinted from the theme's own text colour. */}
+      <div className={styles.frame} aria-hidden="true">
+        <span className={styles.cornerTL} />
+        <span className={styles.cornerTR} />
+        <span className={styles.cornerBL} />
+        <span className={styles.cornerBR} />
+      </div>
+
       <ColorThumbnail
         ref={thumbRef}
         theme={themeStates[previewIndex]}

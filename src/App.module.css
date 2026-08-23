@@ -74,6 +74,59 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Set in from the edges rather than sitting on them: the gap outside is what
+   makes it read as a deliberate margin instead of window chrome. Under the
+   content, so no line is ever drawn across anything. */
+.frame {
+  position: absolute;
+  inset: clamp(9px, 1.1vw, 16px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.frame span {
+  position: absolute;
+  width: clamp(22px, 2.6vw, 38px);
+  height: clamp(22px, 2.6vw, 38px);
+  border: 0 solid var(--text);
+  border-color: color-mix(in srgb, var(--text) 26%, transparent);
+  transition: border-color 700ms ease 150ms;
+}
+
+/* Each mark is two sides of a box and one rounded corner, so the four of them
+   imply a rectangle the eye finishes for itself. */
+.cornerTL {
+  top: 0;
+  left: 0;
+  border-top-width: 1px;
+  border-left-width: 1px;
+  border-top-left-radius: clamp(12px, 1.4vw, 18px);
+}
+
+.cornerTR {
+  top: 0;
+  right: 0;
+  border-top-width: 1px;
+  border-right-width: 1px;
+  border-top-right-radius: clamp(12px, 1.4vw, 18px);
+}
+
+.cornerBL {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-bottom-left-radius: clamp(12px, 1.4vw, 18px);
+}
+
+.cornerBR {
+  bottom: 0;
+  right: 0;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+  border-bottom-right-radius: clamp(12px, 1.4vw, 18px);
+}
+
 .main {
   position: relative;
   /* Above the lighting layers and the grain. */
