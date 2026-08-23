@@ -59,10 +59,17 @@
   transition: background-color 700ms ease 150ms;
 }
 
+/* Hung off the picture, not off the plate: `--dx/--dy/--dw/--dh` are the
+   rectangle the artwork is actually drawn in, measured in the component. Along
+   the plate's edges instead, as these were, a dimension line reads as a border
+   round the page rather than as the width of a coat. */
 .spanWidth {
-  left: clamp(34px, 5vw, 64px);
-  right: 0;
-  bottom: clamp(6px, 1.4vh, 14px);
+  left: var(--dx);
+  width: var(--dw);
+  /* Well clear of the hem: the measured rectangle is the picture's, and the
+     sleeves hang almost to its bottom edge, so a line set tight against it
+     looks like it is touching the garment. */
+  top: calc(var(--dy) + var(--dh) + clamp(26px, 3.4vh, 40px));
   height: 1px;
   transform-origin: left center;
 }
@@ -83,9 +90,9 @@
 }
 
 .spanHeight {
-  left: clamp(12px, 1.8vw, 24px);
-  top: clamp(6px, 1.4vh, 14px);
-  bottom: clamp(34px, 6vh, 58px);
+  left: calc(var(--dx) - clamp(18px, 2.4vw, 32px));
+  top: var(--dy);
+  height: var(--dh);
   width: 1px;
   transform-origin: center top;
 }
@@ -135,6 +142,121 @@
   writing-mode: vertical-rl;
 }
 
+/* --- registration, callout, caption ------------------------------------ */
+
+/* Crop marks at the corners of the artwork, the way a plate is registered for
+   print: two sides of a corner each, held off the picture so they mark it
+   without touching it. They give a cut-out on a plain ground the edges it
+   otherwise has none of. */
+.crop {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border: 0 solid var(--text);
+  border-color: color-mix(in srgb, var(--text) 34%, transparent);
+  transition: border-color 700ms ease 150ms;
+}
+
+.cropTL,
+.cropBL {
+  left: calc(var(--dx) - 9px);
+}
+
+.cropTR,
+.cropBR {
+  left: calc(var(--dx) + var(--dw) - 2px);
+}
+
+.cropTL,
+.cropTR {
+  top: calc(var(--dy) - 9px);
+}
+
+.cropBL,
+.cropBR {
+  top: calc(var(--dy) + var(--dh) - 2px);
+}
+
+.cropTL {
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.cropTR {
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.cropBL {
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.cropBR {
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+/* The leader runs from a point on the garment up to a fixed distance above it.
+   Its length is therefore how far back to the top edge, plus that clearance --
+   so the label lands in open ground however tall the picture is drawn. */
+.callout {
+  --clear: clamp(18px, 3vh, 30px);
+  position: absolute;
+  left: calc(var(--dx) + var(--dw) * var(--ax));
+  top: calc(var(--dy) - var(--clear));
+  width: 1px;
+  height: calc(var(--dh) * var(--ay) + var(--clear));
+  background: color-mix(in srgb, var(--text) 30%, transparent);
+  transform-origin: bottom center;
+  transition: background-color 700ms ease 150ms;
+}
+
+/* On the garment, at the end of the leader. */
+.calloutDot {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--text) 46%, transparent);
+  transform: translate(-50%, 50%);
+  transition: border-color 700ms ease 150ms;
+}
+
+/* Above the line's free end and to the right of it, the way a leader is
+   annotated: text centred on the line would look like a title for the whole
+   drawing rather than a note about one seam. */
+.calloutLabel {
+  position: absolute;
+  left: 4px;
+  bottom: 100%;
+  margin-bottom: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+/* The plate's own line of type, under the width it belongs to and ranged with
+   the left edge of the picture. */
+.caption {
+  position: absolute;
+  left: var(--dx);
+  top: calc(var(--dy) + var(--dh) + clamp(44px, 5.6vh, 62px));
+  margin: 0;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
 /* --- the sheet --------------------------------------------------------- */
 
 .sheet {
@@ -169,7 +291,8 @@
    one site: identical weight and treatment, only the words differ. */
 .heading {
   margin: 0;
-  font-size: clamp(28px, 3.4vw, 50px);
+  /* Matched to the other two sections, so all three carry the same voice. */
+  font-size: clamp(30px, 4vw, 60px);
   line-height: 0.88;
   font-weight: 900;
   letter-spacing: -0.045em;
@@ -192,100 +315,117 @@
   }
 }
 
-.specs {
+/* Two rows of three. Each cell is a small label, the number at display size,
+   and one line of reading-size copy beneath it -- three sizes inside one block,
+   which is the rhythm the column was missing when it ran a headline straight
+   into eight-pixel labels. */
+.figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2.6vh, 30px) clamp(16px, 2.4vw, 34px);
   width: 100%;
-  margin: clamp(20px, 3.4vh, 34px) 0 0;
+  margin-top: clamp(22px, 3.6vh, 38px);
 }
 
-/* Term left, value right, a rule between each pair: what makes five unrelated
-   facts read as one sheet rather than a stack of lines. */
-.spec {
+.figure {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 20px;
-  padding: clamp(7px, 1.2vh, 11px) 0;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: clamp(10px, 1.6vh, 14px);
   border-top: 1px solid var(--text);
-  border-top-color: color-mix(in srgb, var(--text) 12%, transparent);
+  border-top-color: color-mix(in srgb, var(--text) 18%, transparent);
   transition: border-color 700ms ease 150ms;
 }
 
-.spec:first-child {
-  border-top: 0;
-}
-
-.specTerm {
-  font-size: 8.5px;
+.figureLabel {
+  font-size: 8px;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--muted);
   transition: color 700ms ease 150ms;
 }
 
-.specValue {
-  margin: 0;
-  font-size: 11.5px;
-  font-weight: 700;
-  text-align: right;
-  transition: color 700ms ease 150ms;
-}
-
-/* Closes the sheet: the figures with no single part to point at. */
-.stats {
+.figureValue {
   display: flex;
-  width: 100%;
-  margin: clamp(18px, 3vh, 30px) 0 0;
-  padding-top: clamp(14px, 2.4vh, 22px);
-  border-top: 1px solid var(--text);
-  border-top-color: color-mix(in srgb, var(--text) 22%, transparent);
-  transition: border-color 700ms ease 150ms;
-}
-
-.stat {
-  flex: 1;
-  padding-right: clamp(10px, 1.6vw, 22px);
-}
-
-.statValue {
-  font-size: clamp(24px, 2.6vw, 38px);
+  align-items: baseline;
+  gap: 3px;
+  font-size: clamp(26px, 2.9vw, 42px);
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.045em;
   font-variant-numeric: tabular-nums;
   transition: color 700ms ease 150ms;
 }
 
-.statUnit {
-  margin: 7px 0 0;
-  font-size: 8px;
+/* Set small and light against the figure it belongs to: a unit is not part of
+   the number, and at the same weight it reads as though it were. */
+.figureUnit {
+  font-style: normal;
+  font-size: clamp(10px, 0.9vw, 13px);
   font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   color: var(--muted);
   transition: color 700ms ease 150ms;
 }
 
+.figureNote {
+  margin-top: 2px;
+  font-size: clamp(10.5px, 0.8vw, 12px);
+  line-height: 1.45;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+/* Two columns need about 580px between them before either one is legible, so
+   below that they stack: the plate on top, at a third of the height, and the
+   sheet under it. The redrawn section had lost this, and at phone width the
+   figures were running off the right-hand edge of the screen. */
 @media (max-width: 900px) {
   .view {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: clamp(16px, 3vh, 28px);
   }
 
-  /* The dimension lines need margins either side of the garment that a narrow
-     screen does not have. */
-  .spanWidth,
-  .spanHeight {
-    display: none;
-  }
-
+  /* The cap has to be on the picture, not on the plate: the plate is `height:
+     100%` of a row that is sized by its own content, so a max-height there
+     resolves against nothing and the image simply overflows it. */
   .plate {
     padding: 0;
+    height: auto;
+  }
+
+  .jacket {
     max-height: 34vh;
+  }
+
+  /* Stacked, the plate has no padding under it to drop into -- anything hung
+     much below the picture runs into the sheet's first line -- so both stay
+     close to the hem here. */
+  .spanWidth {
+    top: calc(var(--dy) + var(--dh) + 14px);
+  }
+
+  .caption {
+    top: calc(var(--dy) + var(--dh) + 28px);
+  }
+
+  /* The height line and the leader both need a margin beside the garment that
+     a narrow screen does not have. The width line and the caption sit under
+     the picture, where there is still room. */
+  .spanHeight,
+  .callout {
+    display: none;
   }
 
   .sheet {
     max-width: none;
+  }
+
+  /* Three columns of figures at this width leave four characters a line. */
+  .figures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: clamp(14px, 2.4vh, 24px);
   }
 }
 
@@ -295,8 +435,17 @@
    opacity, so the compositor can do all of it without touching layout. */
 .spanHeight,
 .spanWidth,
-.spec {
+.figure,
+.crop,
+.callout,
+.calloutDot,
+.calloutLabel,
+.caption {
   opacity: 0;
+}
+
+.callout {
+  transform: scaleY(0);
 }
 
 .spanHeight {
@@ -307,8 +456,8 @@
   transform: scaleX(0);
 }
 
-.spec {
-  transform: translateX(-12px);
+.figure {
+  transform: translateY(12px);
 }
 
 .shown .spanHeight {
@@ -319,15 +468,64 @@
   animation: growAcross 420ms cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards;
 }
 
-.shown .spec {
+.shown .figure {
   animation: slideIn 340ms ease-out forwards;
-  animation-delay: calc(60ms + var(--row) * 45ms);
+  animation-delay: calc(60ms + var(--cell) * 40ms);
+}
+
+/* The plate registers itself first, then measures, then annotates: crop marks,
+   dimension lines, leader, label, caption. */
+.shown .crop {
+  animation: appear 300ms ease-out forwards;
+}
+
+.shown .cropTR {
+  animation-delay: 50ms;
+}
+
+.shown .cropBR {
+  animation-delay: 100ms;
+}
+
+.shown .cropBL {
+  animation-delay: 150ms;
+}
+
+/* Out of the garment rather than down onto it: the leader belongs to the seam
+   it starts at, so it grows from the dot. */
+.shown .callout {
+  animation: growUp 460ms cubic-bezier(0.16, 1, 0.3, 1) 300ms forwards;
+}
+
+.shown .calloutDot {
+  animation: appear 240ms ease-out 260ms forwards;
+}
+
+.shown .calloutLabel {
+  animation: appear 320ms ease-out 700ms forwards;
+}
+
+.shown .caption {
+  animation: appear 400ms ease-out 780ms forwards;
 }
 
 @keyframes growDown {
   to {
     opacity: 1;
     transform: scaleY(1);
+  }
+}
+
+@keyframes growUp {
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes appear {
+  to {
+    opacity: 1;
   }
 }
 
@@ -350,9 +548,20 @@
 @media (prefers-reduced-motion: reduce) {
   .spanHeight,
   .spanWidth,
-  .spec {
+  .figure,
+  .crop,
+  .callout,
+  .calloutDot,
+  .calloutLabel,
+  .caption {
     opacity: 1;
     transform: none;
     animation: none;
+  }
+
+  /* The dot is centred on the end of its leader by a transform, so it is the
+     one thing here that cannot simply have it removed. */
+  .calloutDot {
+    transform: translate(-50%, 50%);
   }
 }

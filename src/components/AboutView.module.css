@@ -1,27 +1,107 @@
-/* Type alone, stacked: a statement, three columns beneath it, and the contact
-   details closing the page. Neither of the other sections is laid out this way,
-   which is the point -- three screens should not share one composition. */
+/* Symmetrical about the centre, where neither of the other two sections is.
+   Nothing here has to be arranged around an object, so the page settles. */
 .view {
+  position: relative;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: clamp(28px, 5vh, 60px);
+  text-align: center;
+  gap: clamp(16px, 2.4vh, 26px);
   width: 100%;
   height: 100%;
   min-height: 0;
 }
 
-.head {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+/* Everything except the seal reads over it. */
+.view > *:not(.seal) {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- the seal ---------------------------------------------------------- */
+
+/* The rings the product stands on, one screen earlier, with nothing between
+   them any more. Sized to enclose the whole block rather than to sit inside
+   it: a circle drawn through the type reads as a mark laid over the page,
+   where one drawn around it reads as the page being stamped. Measured against
+   both axes, since a square 62% of the width would be taller than a short
+   screen. */
+.seal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: min(62vw, 88vh);
+  height: min(62vw, 88vh);
+  transform: translate(-50%, -50%);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ringOuter,
+.ringInner {
+  fill: none;
+  stroke: var(--text);
+  /* A hairline whatever the seal's rendered size: the viewBox is 200 units
+     across, so a stroke of 1 would thicken with the element. */
+  stroke-width: 0.34;
+  opacity: 0.2;
+  transition: stroke 700ms ease 150ms;
+}
+
+.ringInner {
+  opacity: 0.11;
+}
+
+.ticks line {
+  stroke: var(--text);
+  stroke-width: 0.6;
+  opacity: 0.26;
+  transition: stroke 700ms ease 150ms;
+}
+
+.sealText {
+  fill: var(--text);
+  font-size: 6.6px;
+  font-weight: 700;
+  opacity: 0.24;
+  transition: fill 700ms ease 150ms;
+}
+
+/* Slow enough to be a drift rather than a spin -- a full turn takes longer
+   than anyone stays on the screen, so it never reads as a loop. Turned about
+   the viewBox centre in user units, which needs no `transform-box` support. */
+.sealSpin {
+  transform-origin: 100px 100px;
+  animation: turn 72s linear infinite;
+}
+
+@keyframes turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- the type ---------------------------------------------------------- */
+
+/* The axis the screen is symmetrical about, drawn for a moment rather than
+   merely implied. */
+.plumb {
+  width: 1px;
+  height: clamp(20px, 4vh, 44px);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--text) 42%, transparent)
+  );
 }
 
 .kicker {
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 0 0 clamp(12px, 2vh, 20px);
+  margin: 0;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.26em;
@@ -40,13 +120,30 @@
 /* The same display lockup the other two sections use, so all three read as one
    site: identical weight and treatment, only the words differ. */
 .heading {
+  display: flex;
+  flex-direction: column;
   margin: 0;
-  font-size: clamp(30px, 4.4vw, 68px);
-  line-height: 0.88;
+  font-size: clamp(32px, 5vw, 76px);
+  line-height: 0.86;
   font-weight: 900;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.05em;
   text-transform: uppercase;
   transition: color 700ms ease 150ms;
+}
+
+/* One mask per line, so each can be lifted from under its own edge. The
+   padding is for the outline's stroke and the descenders, which sit outside
+   the line box and would otherwise be shaved off by the mask; the matching
+   negative margin keeps the lockup's spacing exactly as it was. */
+.line {
+  display: block;
+  overflow: hidden;
+  padding: 0.06em 0.06em 0.1em;
+  margin: -0.06em -0.06em -0.1em;
+}
+
+.lineInner {
+  display: block;
 }
 
 .outline {
@@ -64,69 +161,96 @@
   }
 }
 
-.columns {
+/* The middle rung of the scale: the only thing on the screen set to be read as
+   a sentence. A centred paragraph needs a shorter measure than a ranged one --
+   both edges are ragged, so a long line loses the reader on the way back. */
+.lead {
+  margin: 0;
+  max-width: 48ch;
+  font-size: clamp(12.5px, 0.95vw, 14.5px);
+  line-height: 1.7;
+  color: var(--muted);
+  transition: color 700ms ease 150ms;
+}
+
+.pillars {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(20px, 4vw, 64px);
-  max-width: 1000px;
+  width: 100%;
+  /* Kept inside the seal: a column the ring runs through is being crossed
+     out, not framed. */
+  max-width: 740px;
+  margin-top: clamp(10px, 2vh, 22px);
 }
 
-.column {
-  border-top: 1px solid var(--text);
-  border-top-color: color-mix(in srgb, var(--text) 20%, transparent);
-  padding-top: clamp(12px, 2vh, 18px);
-  transition: border-color 700ms ease 150ms;
+/* Rules between the columns, not above them: a line over each one would cut a
+   centred block into three separate objects, where these should read as one.
+   Drawn as a pseudo-element rather than a border so each can be ruled out of
+   its own middle as the column it divides arrives. */
+.pillar {
+  position: relative;
+  padding: 0 clamp(14px, 2.4vw, 34px);
 }
 
-.columnHead {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 0 0 10px;
-  font-size: 10px;
+.pillar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--text) 16%, transparent);
+  transition: background-color 700ms ease 150ms;
+}
+
+.pillar:first-child::before {
+  display: none;
+}
+
+.pillarTerm {
+  margin: 0 0 8px;
+  font-size: 9.5px;
   font-weight: 800;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   transition: color 700ms ease 150ms;
 }
 
-/* Small enough to be counted without being read, which is all a marker has to
-   do once the columns are already divided by rules. */
-.columnIndex {
-  font-size: 8px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  opacity: 0.7;
-  transition: color 700ms ease 150ms;
-}
-
-.columnBody {
+.pillarBody {
   margin: 0;
-  /* Around 42 characters a line: three columns of copy need a shorter measure
-     than one, or the eye loses its place returning to the left edge. */
-  max-width: 42ch;
   font-size: clamp(11px, 0.82vw, 12.5px);
-  line-height: 1.75;
+  line-height: 1.65;
   color: var(--muted);
   transition: color 700ms ease 150ms;
 }
 
 .contact {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(20px, 4vw, 64px);
-  margin: 0;
+  justify-content: center;
+  gap: clamp(18px, 3.4vw, 52px);
+  margin: clamp(14px, 2.6vh, 30px) 0 0;
   padding-top: clamp(14px, 2.4vh, 22px);
-  border-top: 1px solid var(--text);
-  border-top-color: color-mix(in srgb, var(--text) 14%, transparent);
-  transition: border-color 700ms ease 150ms;
+}
+
+/* The rule the footer hangs from, drawn rather than bordered for the same
+   reason as the pillars': it is opened out of the centre. */
+.contact::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+  transition: background-color 700ms ease 150ms;
 }
 
 .contactItem {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 9px;
 }
 
 .contactTerm {
@@ -139,25 +263,129 @@
 }
 
 .contactValue {
+  position: relative;
   margin: 0;
   font-size: 11px;
   font-weight: 600;
   transition: color 700ms ease 150ms;
 }
 
-/* --- the reveal -------------------------------------------------------- */
-
-/* Held back until the section is in view, then run once. Only transform and
-   opacity, so the compositor can do all of it without touching layout. */
-.column {
-  opacity: 0;
-  transform: translateY(14px);
+/* Underlined only under the pointer, and opened from the left the way a rule
+   is drawn. Nothing here is a link, so the line answers attention rather than
+   promising somewhere to go. */
+.contactValue::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.45;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.shown .column {
+.contactItem:hover .contactValue::after {
+  transform: scaleX(1);
+}
+
+/* --- the reveal -------------------------------------------------------- */
+
+/* Held back until the section is in view, then run once, in the order the page
+   is read: the axis, the label, the words, the sentence, the columns, the way
+   to reach us. Only transform and opacity, so the compositor can do all of it
+   without touching layout. */
+.seal,
+.plumb,
+.kicker,
+.lineInner,
+.lead,
+.pillar,
+.pillar::before,
+.contact::before,
+.contactItem {
+  opacity: 0;
+}
+
+.seal {
+  transform: translate(-50%, -50%) scale(0.94);
+}
+
+.plumb,
+.pillar::before {
+  transform: scaleY(0);
+}
+
+.contact::before {
+  transform: scaleX(0);
+}
+
+.lineInner {
+  transform: translateY(105%);
+}
+
+.lead,
+.pillar,
+.contactItem {
+  transform: translateY(12px);
+}
+
+.shown .seal {
+  animation: settle 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.shown .plumb {
+  animation: drawDown 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.shown .kicker {
+  animation: fade 420ms ease-out 120ms forwards;
+}
+
+/* Up from under the mask's edge, one line after the other. */
+.shown .lineInner {
+  animation: lift 640ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(180ms + var(--cell) * 90ms);
+}
+
+.shown .lead {
+  animation: rise 480ms ease-out 420ms forwards;
+}
+
+/* The rule first, then the column it divides: a page ruled and then set. */
+.shown .pillar::before {
+  animation: openOut 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(520ms + var(--cell) * 70ms);
+}
+
+.shown .pillar {
   animation: rise 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   /* Staggered, so the three read as being set one after another. */
-  animation-delay: calc(60ms + var(--row) * 70ms);
+  animation-delay: calc(560ms + var(--cell) * 70ms);
+}
+
+.shown .contact::before {
+  animation: openAcross 700ms cubic-bezier(0.16, 1, 0.3, 1) 700ms forwards;
+}
+
+.shown .contactItem {
+  animation: rise 420ms ease-out forwards;
+  animation-delay: calc(820ms + var(--cell) * 60ms);
+}
+
+@keyframes settle {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes fade {
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes rise {
@@ -167,21 +395,98 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .column {
+@keyframes lift {
+  to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes drawDown {
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes openOut {
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes openAcross {
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* Nothing to reveal for someone who asked not to be moved: everything simply
+   starts where it ends up, and the seal holds still. */
+@media (prefers-reduced-motion: reduce) {
+  .seal,
+  .plumb,
+  .kicker,
+  .lineInner,
+  .lead,
+  .pillar,
+  .pillar::before,
+  .contact::before,
+  .contactItem {
+    opacity: 1;
+    animation: none;
+  }
+
+  .plumb,
+  .kicker,
+  .lineInner,
+  .lead,
+  .pillar,
+  .pillar::before,
+  .contact::before,
+  .contactItem {
+    transform: none;
+  }
+
+  .seal {
+    transform: translate(-50%, -50%);
+  }
+
+  .sealSpin {
     animation: none;
   }
 }
 
 @media (max-width: 900px) {
-  .columns {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  /* Behind a one-column stack the rings crowd the type, so the seal falls back
+     to a fainter watermark the text simply sits over. */
+  .seal {
+    width: min(86vw, 52vh);
+    height: min(86vw, 52vh);
   }
 
-  .view {
-    gap: 26px;
+  .ringOuter,
+  .ticks line,
+  .sealText {
+    opacity: 0.16;
+  }
+
+  .ringInner {
+    opacity: 0.1;
+  }
+
+  .pillars {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .pillar {
+    padding: 0;
+  }
+
+  .pillar::before {
+    display: none;
   }
 }
