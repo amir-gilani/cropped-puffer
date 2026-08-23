@@ -7,15 +7,27 @@
 html,
 body,
 #root {
-  height: 100%;
   margin: 0;
 }
 
 body {
   font-family: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-  background: var(--bg, #d9dade);
+  background: var(--bg, #e6e0d3);
+}
+
+/* No scroll snapping: the wheel handler in App.jsx moves a whole section at a
+   time and lands on exact section tops, and a snap engine running alongside it
+   only fights the same scroll position mid-animation. */
+html {
+  scroll-behavior: smooth;
+  /* Hidden, not disabled: the page still scrolls, but a draggable bar would
+     offer a freedom of movement it does not actually have. */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 button {

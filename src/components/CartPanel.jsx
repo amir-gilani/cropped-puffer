@@ -67,7 +67,7 @@ export default function CartPanel({ open, lines, onClose, onRemove }) {
             {lines.length === 0 ? (
               <p className={styles.empty}>Nothing in here yet.</p>
             ) : (
-              <ul className={styles.lines}>
+              <ul className={styles.lines} data-scrollable>
                 <AnimatePresence initial={false}>
                   {lines.map((line) => (
                     <motion.li

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import Header from './components/Header.jsx'
 import HeroSection from './components/HeroSection.jsx'
 import Stepper from './components/Stepper.jsx'
@@ -39,8 +38,6 @@ export default function App() {
   const [size, setSize] = useState(36)
   const [cart, setCart] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
-  // Which section is on screen. No router: one page, swapped in place.
-  const [view, setView] = useState('overview')
   // Docking geometry measured at click time and handed to the exiting jacket
   // through AnimatePresence's `custom`, so it never goes stale mid-swap.
   const [swap, setSwap] = useState({
@@ -52,6 +49,7 @@ export default function App() {
   const stageRef = useRef(null)
   const thumbRef = useRef(null)
   const navRef = useRef(null)
+  const performanceRef = useRef(null)
   const timersRef = useRef([])
 
   const clearTimers = () => {
@@ -140,6 +138,63 @@ export default function App() {
     setThumbHidden(false)
   }, [])
 
+  // One gesture, one section. CSS snapping alone will not do this: it releases
+  // to the *nearest* snap point, so anything short of half a screen springs
+  // back where it came from -- a 400px flick on a 900px screen goes nowhere.
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    let locked = false
+
+    const sections = () => Array.from(document.querySelectorAll('[data-section]'))
+    const move = (step) => {
+      const all = sections()
+      const here = Math.round(window.scrollY / window.innerHeight)
+      const target = all[Math.min(all.length - 1, Math.max(0, here + step))]
+      if (!target) return
+      locked = true
+      target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+      // Long enough to cover the smooth scroll, so the momentum of one flick
+      // cannot be read as a second gesture.
+      window.setTimeout(() => {
+        locked = false
+      }, reduce ? 80 : 760)
+    }
+
+    const onWheel = (event) => {
+      // Anything that scrolls on its own -- the cart's list -- keeps its wheel.
+      if (event.target.closest?.('[data-scrollable]')) return
+      if (Math.abs(event.deltaY) < 6) return
+      event.preventDefault()
+      if (!locked) move(event.deltaY > 0 ? 1 : -1)
+    }
+
+    const KEYS = {
+      ArrowDown: 1,
+      PageDown: 1,
+      ' ': 1,
+      ArrowUp: -1,
+      PageUp: -1,
+    }
+    const onKey = (event) => {
+      const step = KEYS[event.key]
+      if (!step || event.target.closest?.('input, textarea')) return
+      event.preventDefault()
+      if (!locked) move(step)
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [])
+
+  const goTo = useCallback((target) => {
+    if (target === 'performance') performanceRef.current?.scrollIntoView({ behavior: 'smooth' })
+    else window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
   const step = useCallback(
     (direction) => {
       const target = index + direction
@@ -206,7 +261,7 @@ export default function App() {
 
   return (
     <div
-      className={styles.screen}
+      className={styles.page}
       style={{
         '--bg': theme.background,
         '--text': theme.text,
@@ -221,56 +276,33 @@ export default function App() {
         '--vignette-color': theme.vignetteColor,
       }}
     >
-      <Header
-        ref={navRef}
-        view={view}
-        onNavigate={setView}
-        cartCount={cartCount}
-        cartOpen={cartOpen}
-        onCartClick={() => setCartOpen((open) => !open)}
-      />
+      {/* Both sections are mounted and reached by scrolling. The header belongs
+          to the first screen only, so it leaves with it rather than following
+          the reader down the page. */}
+      <section className={styles.screen} data-section>
+        <Header
+          ref={navRef}
+          onNavigate={goTo}
+          cartCount={cartCount}
+          cartOpen={cartOpen}
+          onCartClick={() => setCartOpen((open) => !open)}
+        />
 
-      <main className={styles.main}>
-        {/* Keyed on the view, so one section leaves before the next arrives --
-            they occupy the same space and would otherwise overlap mid-change. */}
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={view}
-            className={view === 'overview' ? styles.columns : styles.single}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {view === 'overview' ? (
-              <>
-                <HeroSection />
-                <ProductStand
-                  theme={theme}
-                  themeIndex={index}
-                  swap={swap}
-                  stageRef={stageRef}
-                  onBuy={addToCart}
-                  onExitComplete={() => revealCorner(index)}
-                />
-                <PurchasePanel theme={theme} size={size} onSize={setSize} />
-              </>
-            ) : (
-              <PerformanceView />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+        <main className={styles.main}>
+          <div className={styles.columns}>
+            <HeroSection />
+            <ProductStand
+              theme={theme}
+              themeIndex={index}
+              swap={swap}
+              stageRef={stageRef}
+              onBuy={addToCart}
+              onExitComplete={() => revealCorner(index)}
+            />
+            <PurchasePanel theme={theme} size={size} onSize={setSize} />
+          </div>
+        </main>
 
-      <CartPanel
-        open={cartOpen}
-        lines={cart}
-        onClose={() => setCartOpen(false)}
-        onRemove={removeLine}
-      />
-
-      {/* Stepping through colourways only means anything on the overview. */}
-      {view === 'overview' && (
         <Stepper
           onPrev={() => step(-1)}
           onNext={() => step(1)}
@@ -279,29 +311,38 @@ export default function App() {
           index={index}
           total={themeStates.length}
         />
-      )}
 
-      {/* Breaks up banding across the big soft gradients. */}
+        <ColorThumbnail
+          ref={thumbRef}
+          theme={themeStates[previewIndex]}
+          hidden={thumbHidden}
+          fadeIn={thumbFadeIn}
+          fadeOut={thumbFadeOut}
+          onClick={() => step(previewIndex > index ? 1 : -1)}
+        />
+      </section>
+
+      <section className={styles.section} ref={performanceRef} id="performance" data-section>
+        <PerformanceView theme={theme} />
+      </section>
+
+      <CartPanel
+        open={cartOpen}
+        lines={cart}
+        onClose={() => setCartOpen(false)}
+        onRemove={removeLine}
+      />
+
+      {/* Fixed, so the lighting, the grain and the frame stay with the viewport
+          rather than scrolling away with the first screen. */}
       <div className={styles.grain} aria-hidden="true" />
 
-      {/* Corner marks rather than a closed border: the eye completes the
-          rectangle on its own, so the page is framed without a line being drawn
-          across every edge. Tinted from the theme's own text colour. */}
       <div className={styles.frame} aria-hidden="true">
         <span className={styles.cornerTL} />
         <span className={styles.cornerTR} />
         <span className={styles.cornerBL} />
         <span className={styles.cornerBR} />
       </div>
-
-      <ColorThumbnail
-        ref={thumbRef}
-        theme={themeStates[previewIndex]}
-        hidden={thumbHidden || view !== 'overview'}
-        fadeIn={thumbFadeIn}
-        fadeOut={thumbFadeOut}
-        onClick={() => step(previewIndex > index ? 1 : -1)}
-      />
     </div>
   )
 }

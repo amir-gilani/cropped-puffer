@@ -1,6 +1,6 @@
 /* Dims the page and swallows the click that would otherwise land behind. */
 .catcher {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 8;
   background: rgba(0, 0, 0, 0.35);
@@ -9,7 +9,7 @@
 /* A full-height drawer on the right edge. Only the inner corners are rounded,
    because the outer ones run off the screen. */
 .panel {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;

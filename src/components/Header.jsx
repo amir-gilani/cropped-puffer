@@ -11,8 +11,13 @@ const NAV_ITEMS = [
 ]
 
 /** `activeNavRef` marks the docking slot the outgoing jacket flies into. */
+// The header lives on the first screen only, so it is only ever read from
+// there: the highlight belongs on that section and never moves. Tracking the
+// scroll instead just meant watching the pill slide back on the way up.
+const HERE = 'overview'
+
 const Header = forwardRef(function Header(
-  { cartCount, cartOpen, onCartClick, view, onNavigate },
+  { cartCount, cartOpen, onCartClick, onNavigate },
   activeNavRef,
 ) {
   return (
@@ -31,10 +36,10 @@ const Header = forwardRef(function Header(
             className={styles.navItem}
             type="button"
             disabled={!item.view}
-            aria-current={item.view === view ? 'page' : undefined}
+            aria-current={item.view === HERE ? 'page' : undefined}
             onClick={() => item.view && onNavigate(item.view)}
           >
-            {item.view === view && (
+            {item.view === HERE && (
               // One element shared across the items, so it slides between them
               // rather than disappearing here and reappearing there.
               <motion.span

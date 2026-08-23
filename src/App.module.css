@@ -1,17 +1,33 @@
-.screen {
+/* The document: carries the colourway, and scrolls. */
+.page {
   position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  padding: clamp(18px, 2.4vw, 34px) clamp(18px, 3vw, 48px);
-  gap: clamp(8px, 1.5vh, 24px);
   background-color: var(--bg);
   color: var(--text);
   /* The colour change trails the departing jacket by a beat. */
   transition: background-color 700ms ease, color 700ms ease;
   transition-delay: 150ms;
+}
+
+/* One viewport each, with a snap point at the top, so a flick of the wheel
+   lands on a section rather than between two. `overflow: hidden` is what clips
+   a jacket leaving the frame, so it belongs here rather than on the document. */
+.screen,
+.section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  padding: clamp(18px, 2.4vw, 34px) clamp(18px, 3vw, 48px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: clamp(8px, 1.5vh, 24px);
+}
+
+/* The second section has no header, so it stands in a band of the same height:
+   the content of both then begins on the same line. */
+.section::before {
+  content: '';
+  height: 34px;
 }
 
 /*
@@ -21,11 +37,13 @@
  * both transition, gradient colour stops do not -- so this way the light eases
  * with the rest of the theme instead of snapping at the swap.
  */
-.screen::before,
-.screen::after {
+.page::before,
+.page::after {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
+  will-change: opacity;
+  transform: translateZ(0);
   z-index: 0;
   pointer-events: none;
   transition: opacity 700ms ease 150ms, background-color 700ms ease 150ms;
@@ -33,7 +51,7 @@
 
 /* The pool of light the jacket stands in, centred on the stage rather than on
    the screen -- it sits a little high, where the jacket's body is. */
-.screen::before {
+.page::before {
   background-color: var(--glow-color);
   --pool: radial-gradient(
     ellipse 54% 56% at 50% 48%,
@@ -49,7 +67,7 @@
 
 /* Darkened edges, so nothing at the rim competes with the centre. Held off the
    corners' content by starting well outside the stage. */
-.screen::after {
+.page::after {
   background-color: var(--vignette-color);
   --edges: radial-gradient(
     ellipse 82% 76% at 50% 50%,
@@ -65,12 +83,12 @@
 /* A faint film of noise over both. Large, very soft gradients band into visible
    rings on dark backgrounds; a little grain dithers them away. */
 .grain {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  transform: translateZ(0);
   z-index: 1;
   pointer-events: none;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -78,7 +96,7 @@
    makes it read as a deliberate margin instead of window chrome. Under the
    content, so no line is ever drawn across anything. */
 .frame {
-  position: absolute;
+  position: fixed;
   inset: clamp(9px, 1.1vw, 16px);
   z-index: 1;
   pointer-events: none;

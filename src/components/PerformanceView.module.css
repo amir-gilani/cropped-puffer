@@ -1,27 +1,155 @@
+/* Two unequal columns: the drawing on the left, the sheet it belongs to on the
+   right. The imbalance is the point -- the first screen is symmetrical about
+   the jacket, and repeating that here made the two read as the same page. */
 .view {
-  position: relative;
-  z-index: 2;
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(260px, 0.85fr) minmax(320px, 1fr);
   align-items: center;
-  gap: clamp(28px, 6vw, 90px);
+  gap: clamp(28px, 6vw, 96px);
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
+  height: 100%;
   min-height: 0;
 }
 
-.intro {
+/* --- the drawing ------------------------------------------------------- */
+
+.plate {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  /* A grid item's automatic minimum is its content's own size, and this one
+     contains a 1120px image -- without these the column refuses to be narrower
+     than the photograph and pushes the sheet off the screen. */
+  min-height: 0;
+  min-width: 0;
+  margin: 0;
+  /* Room on the left and underneath for the dimension lines to live in. */
+  padding: 0 0 clamp(28px, 5vh, 48px) clamp(34px, 5vw, 64px);
+}
+
+.jacket {
+  /* Capped rather than filling the column. The artwork is 1120px wide, so at
+     460 CSS pixels even a 2x screen is downscaling it -- and a downscale is
+     always the sharp direction. */
+  max-width: min(100%, 460px);
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 26px var(--shadow));
+  transition: filter 700ms ease 150ms;
+  user-select: none;
+}
+
+/* Both dimension lines are ticked at their ends by the same means: a border on
+   each side of a one-pixel bar, drawn with pseudo-elements. */
+.spanWidth,
+.spanHeight {
+  position: absolute;
+  background: color-mix(in srgb, var(--text) 26%, transparent);
+  transition: background-color 700ms ease 150ms;
+}
+
+.spanWidth::before,
+.spanWidth::after,
+.spanHeight::before,
+.spanHeight::after {
+  content: '';
+  position: absolute;
+  background: color-mix(in srgb, var(--text) 40%, transparent);
+  transition: background-color 700ms ease 150ms;
+}
+
+.spanWidth {
+  left: clamp(34px, 5vw, 64px);
+  right: 0;
+  bottom: clamp(6px, 1.4vh, 14px);
+  height: 1px;
+  transform-origin: left center;
+}
+
+.spanWidth::before,
+.spanWidth::after {
+  top: -4px;
+  width: 1px;
+  height: 9px;
+}
+
+.spanWidth::before {
+  left: 0;
+}
+
+.spanWidth::after {
+  right: 0;
+}
+
+.spanHeight {
+  left: clamp(12px, 1.8vw, 24px);
+  top: clamp(6px, 1.4vh, 14px);
+  bottom: clamp(34px, 6vh, 58px);
+  width: 1px;
+  transform-origin: center top;
+}
+
+.spanHeight::before,
+.spanHeight::after {
+  left: -4px;
+  height: 1px;
+  width: 9px;
+}
+
+.spanHeight::before {
+  top: 0;
+}
+
+.spanHeight::after {
+  bottom: 0;
+}
+
+/* On the line rather than beside it, with the page colour behind so the rule
+   appears to pass through the text. */
+.spanLabel,
+.spanLabelVertical {
+  position: absolute;
+  background: var(--bg);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  transition: color 700ms ease 150ms, background-color 700ms ease 150ms;
+}
+
+.spanLabel {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0 7px;
+}
+
+.spanLabelVertical {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 7px 0;
+  writing-mode: vertical-rl;
+}
+
+/* --- the sheet --------------------------------------------------------- */
+
+.sheet {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  max-width: 520px;
 }
 
 .kicker {
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 0 0 clamp(16px, 2.6vh, 26px);
+  margin: 0 0 clamp(12px, 2vh, 20px);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.26em;
@@ -37,11 +165,11 @@
   background: currentColor;
 }
 
-/* The same display lockup the overview uses, so the two views read as one
-   site: identical size and weight, only the fill differs. */
+/* The same display lockup the first screen uses, so the two sections read as
+   one site: identical weight and treatment, only the words differ. */
 .heading {
   margin: 0;
-  font-size: clamp(30px, 3.6vw, 54px);
+  font-size: clamp(28px, 3.4vw, 50px);
   line-height: 0.88;
   font-weight: 900;
   letter-spacing: -0.045em;
@@ -64,166 +192,167 @@
   }
 }
 
-.scale {
+.specs {
   width: 100%;
-  max-width: 380px;
-  margin-top: clamp(24px, 4vh, 40px);
+  margin: clamp(20px, 3.4vh, 34px) 0 0;
 }
 
-.track {
-  position: relative;
-  height: 4px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text) 12%, transparent);
-  transition: background-color 700ms ease 150ms;
-}
-
-.comfort {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  border-radius: 999px;
-  background: var(--text);
-  /* Grows from its own left edge, so it reads as a range being measured out
-     rather than a block fading in. */
-  transform-origin: left center;
-  transition: background-color 700ms ease 150ms;
-}
-
-.scaleLabels {
+/* Term left, value right, a rule between each pair: what makes five unrelated
+   facts read as one sheet rather than a stack of lines. */
+.spec {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-top: 10px;
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  transition: color 700ms ease 150ms;
-}
-
-.comfortLabel {
-  color: var(--text);
-  transition: color 700ms ease 150ms;
-}
-
-.detail {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(20px, 3.4vh, 34px);
-}
-
-.metrics {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(12px, 2vh, 18px);
-}
-
-.metric {
-  display: grid;
-  gap: 6px;
-}
-
-.metricHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.metricLabel {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  transition: color 700ms ease 150ms;
-}
-
-.metricValue {
-  font-size: 12px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  transition: color 700ms ease 150ms;
-}
-
-.bar {
-  display: block;
-  height: 2px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--text) 12%, transparent);
-  transition: background-color 700ms ease 150ms;
-}
-
-.fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--text);
-  transform-origin: left center;
-  transition: background-color 700ms ease 150ms;
-}
-
-.metricNote {
-  font-size: 9.5px;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  transition: color 700ms ease 150ms;
-}
-
-/* Facts with no scale to plot, so they are set as a list rather than forced
-   into bars they do not belong in. */
-.materials {
-  margin: 0;
-  padding-top: clamp(14px, 2.4vh, 22px);
+  gap: 20px;
+  padding: clamp(7px, 1.2vh, 11px) 0;
   border-top: 1px solid var(--text);
-  border-top-color: color-mix(in srgb, var(--text) 14%, transparent);
+  border-top-color: color-mix(in srgb, var(--text) 12%, transparent);
   transition: border-color 700ms ease 150ms;
 }
 
-.material {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 5px 0;
+.spec:first-child {
+  border-top: 0;
 }
 
-.materialLabel {
+.specTerm {
   font-size: 8.5px;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--muted);
   transition: color 700ms ease 150ms;
 }
 
-.materialValue {
+.specValue {
   margin: 0;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 11.5px;
+  font-weight: 700;
   text-align: right;
+  transition: color 700ms ease 150ms;
+}
+
+/* Closes the sheet: the figures with no single part to point at. */
+.stats {
+  display: flex;
+  width: 100%;
+  margin: clamp(18px, 3vh, 30px) 0 0;
+  padding-top: clamp(14px, 2.4vh, 22px);
+  border-top: 1px solid var(--text);
+  border-top-color: color-mix(in srgb, var(--text) 22%, transparent);
+  transition: border-color 700ms ease 150ms;
+}
+
+.stat {
+  flex: 1;
+  padding-right: clamp(10px, 1.6vw, 22px);
+}
+
+.statValue {
+  font-size: clamp(24px, 2.6vw, 38px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  transition: color 700ms ease 150ms;
+}
+
+.statUnit {
+  margin: 7px 0 0;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
   transition: color 700ms ease 150ms;
 }
 
 @media (max-width: 900px) {
   .view {
     grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
-    gap: 32px;
+    gap: 24px;
   }
 
-  .intro {
-    align-items: center;
+  /* The dimension lines need margins either side of the garment that a narrow
+     screen does not have. */
+  .spanWidth,
+  .spanHeight {
+    display: none;
   }
 
-  .detail {
-    width: 100%;
-    max-width: 420px;
+  .plate {
+    padding: 0;
+    max-height: 34vh;
+  }
+
+  .sheet {
+    max-width: none;
+  }
+}
+
+/* --- the reveal -------------------------------------------------------- */
+
+/* Held back until the section is in view, then run once. Only transform and
+   opacity, so the compositor can do all of it without touching layout. */
+.spanHeight,
+.spanWidth,
+.spec {
+  opacity: 0;
+}
+
+.spanHeight {
+  transform: scaleY(0);
+}
+
+.spanWidth {
+  transform: scaleX(0);
+}
+
+.spec {
+  transform: translateX(-12px);
+}
+
+.shown .spanHeight {
+  animation: growDown 500ms cubic-bezier(0.16, 1, 0.3, 1) 100ms forwards;
+}
+
+.shown .spanWidth {
+  animation: growAcross 500ms cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards;
+}
+
+.shown .spec {
+  animation: slideIn 400ms ease-out forwards;
+  animation-delay: calc(200ms + var(--row) * 60ms);
+}
+
+@keyframes growDown {
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes growAcross {
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes slideIn {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Nothing to reveal for someone who asked not to be moved: everything simply
+   starts where it ends up. */
+@media (prefers-reduced-motion: reduce) {
+  .spanHeight,
+  .spanWidth,
+  .spec {
+    opacity: 1;
+    transform: none;
+    animation: none;
   }
 }

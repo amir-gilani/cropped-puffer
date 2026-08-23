@@ -11,7 +11,6 @@
      theme is on screen instead of being a grey box laid over all of them. */
   border-color: color-mix(in srgb, var(--text) 14%, transparent);
   background: var(--panel);
-  backdrop-filter: blur(10px);
   transition: background-color 700ms ease 150ms, border-color 700ms ease 150ms;
 }
 
