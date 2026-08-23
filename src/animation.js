@@ -33,7 +33,7 @@ export const THUMB_FADE_S = 0.3
 // Where along the nav item the jacket aims, as a fraction of its width:
 // 0 is the left edge of the label, 0.5 its centre. Negative nudges it further
 // left, past the start of the pill.
-export const NAV_ANCHOR = -0.2
+export const NAV_ANCHOR = -0.7
 
 // Fallback aspect ratio, used only if the thumbnail image has not decoded yet
 // when the first swap fires. Real value is read from the PNG at run time.
