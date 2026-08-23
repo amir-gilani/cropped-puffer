@@ -15,15 +15,12 @@ export const TIMING = {
 // top. It never shoots off screen -- it shrinks into whichever slot it is
 // heading for and hands over there.
 
-// Going back, the jacket lands in the corner slot on top of the thumbnail and
-// is then simply removed. It stays fully opaque the whole way: cross-fading it
-// with the thumbnail would NOT hold a constant image, because two copies of the
-// same artwork at opacity a and b composite to 1-(1-a)(1-b) -- ~0.75 at the
-// midpoint -- so the pair washes out and then snaps back to solid. Instead the
-// thumbnail turns fully opaque underneath at this point in the trip, by which
-// the ease-out-expo move is within a fraction of a pixel of its destination, so
-// the two are pixel-identical and removing the top one is invisible.
-export const HANDOVER = 0.92
+// Going back, the jacket lands in the corner slot and stays fully opaque the
+// whole way: cross-fading it with the thumbnail would NOT hold a constant
+// image, because two copies of the same artwork at opacity a and b composite to
+// 1-(1-a)(1-b) -- ~0.75 at the midpoint -- so the pair washes out and then snaps
+// back to solid. The thumbnail is put back on the frame the jacket is removed
+// instead, so only one of them is ever in that corner.
 
 // Going forward, the jacket docks into the nav item with nothing underneath to
 // take over, so there it really does fade -- from this point on the trip.
@@ -52,4 +49,3 @@ export const SWAP_MS = (TIMING.enterDelay + TIMING.enterDuration) * 1000
 // until `enterDelay`, and an ease-out-expo move clears it almost immediately
 // after -- waiting for the whole swap to finish just makes the preview late.
 export const PREVIEW_MS = (TIMING.enterDelay + TIMING.enterDuration * 0.25) * 1000
-export const HANDOVER_MS = TIMING.exitDuration * HANDOVER * 1000

@@ -9,7 +9,6 @@ import ColorThumbnail from './components/ColorThumbnail.jsx'
 import themeStates from './themeStates.js'
 import styles from './App.module.css'
 import {
-  HANDOVER_MS,
   JACKET_RATIO,
   NAV_ANCHOR,
   EXIT_MS,
@@ -33,7 +32,6 @@ export default function App() {
   // Switching off is instant when a solid jacket is already covering that spot.
   const [thumbFadeOut, setThumbFadeOut] = useState(0.2)
   // True for the sliver of time a landed jacket is still sitting on the corner.
-  const [thumbCovered, setThumbCovered] = useState(false)
   // The size lives here rather than in the panel that shows it, because the
   // Buy button under the jacket needs it too.
   const [size, setSize] = useState(36)
@@ -131,6 +129,13 @@ export default function App() {
     }
   }, [])
 
+  // Puts the corner back, with whichever colourway is now on deck. Safe to call
+  // twice: the second call finds nothing to change.
+  const revealCorner = useCallback((target) => {
+    setPreviewIndex(previewFor(target))
+    setThumbHidden(false)
+  }, [])
+
   const step = useCallback(
     (direction) => {
       const target = index + direction
@@ -144,25 +149,29 @@ export default function App() {
 
       setThumbHidden(true)
 
-      // Going back, the outgoing jacket parks in the corner slot, so the
-      // thumbnail takes over underneath it just before it lands -- instantly,
-      // and with the same colourway, which is why the hand-over is invisible.
-      // Going forward it docks into the nav instead, and the corner previews
-      // the next colourway as soon as the incoming jacket has cleared that
-      // slot -- not at the end of the swap, which showed as a late preview.
-      const revealAt = direction > 0 ? PREVIEW_MS : HANDOVER_MS
       setThumbFadeIn(direction > 0 ? THUMB_FADE_S : 0)
       setThumbFadeOut(direction > 0 ? 0 : 0.2)
-      setThumbCovered(direction < 0)
+
+      // Going forward, the corner is emptied and previews the next colourway as
+      // soon as the incoming jacket has cleared that slot -- waiting for the
+      // whole swap showed as a late preview.
+      //
+      // Going back, the jacket lands *on* the corner, and nothing is put there
+      // until it is gone: `onExitComplete` swaps one for the other on the frame
+      // the jacket is removed. Earlier versions had the thumbnail arrive first
+      // and juggle shadows underneath it, but two elements in one spot means
+      // two shadows, two clocks and two chances to pulse. One at a time cannot.
       timersRef.current = [
-        setTimeout(() => {
-          setPreviewIndex(previewFor(target))
-          setThumbHidden(false)
-        }, revealAt),
-        // The jacket is gone; the corner takes its shadow back.
-        setTimeout(() => setThumbCovered(false), EXIT_MS),
+        direction > 0 &&
+          setTimeout(() => {
+            setPreviewIndex(previewFor(target))
+            setThumbHidden(false)
+          }, PREVIEW_MS),
+        // Safety net: if the exit never completes -- an interrupted swap --
+        // the corner must not be left empty.
+        direction < 0 && setTimeout(() => revealCorner(target), EXIT_MS + 400),
         setTimeout(() => setIsAnimating(false), SWAP_MS),
-      ]
+      ].filter(Boolean)
     },
     [index, isAnimating, measure],
   )
@@ -231,6 +240,7 @@ export default function App() {
           swap={swap}
           stageRef={stageRef}
           onBuy={addToCart}
+          onExitComplete={() => revealCorner(index)}
         />
         <PurchasePanel theme={theme} size={size} onSize={setSize} />
       </main>
@@ -260,7 +270,6 @@ export default function App() {
         hidden={thumbHidden}
         fadeIn={thumbFadeIn}
         fadeOut={thumbFadeOut}
-        covered={thumbCovered}
         onClick={() => step(previewIndex > index ? 1 : -1)}
       />
     </div>

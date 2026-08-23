@@ -10,24 +10,18 @@
   place-items: center;
 }
 
-/* Covered by the jacket that just landed here: its shadow is the one on show,
-   so this one steps aside rather than stacking with it. The two are matched, so
-   handing the shadow back over when the jacket is removed is invisible. */
-.covered img {
-  filter: none;
-  /* Steps, never eases. The img below carries a filter transition for theme
-     colour changes, and letting it run here would drag the shadow back in over
-     700ms instead of at the instant the jacket is removed. */
-  transition: none;
-}
-
 .thumb img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  /* Roughly the centre jacket's shadow scaled down by the same factor, so the
-     handover at the end of a swap does not pop. */
-  filter: drop-shadow(0 7px 10px var(--shadow));
+  /* This has to match the centre jacket's own shadow *as it appears when it has
+     landed here*, because the hand-over swaps one for the other in a single
+     frame. The jacket carries drop-shadow(0 24px 34px) and arrives scaled by
+     thumbnail width / stage width -- around 0.17 at these sizes -- so 24 and 34
+     become roughly 4 and 6. It was still set for a thumbnail half again as wide
+     as this one, which is why the shadow jumped at the swap.
+     Re-derive these two numbers whenever either element is resized. */
+  filter: drop-shadow(0 4px 6px var(--shadow));
   transition: filter 700ms ease 150ms;
   user-select: none;
 }

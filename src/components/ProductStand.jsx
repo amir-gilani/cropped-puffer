@@ -65,7 +65,7 @@ const jacketVariants = {
         },
 }
 
-export default function ProductStand({ theme, themeIndex, swap, stageRef, onBuy }) {
+export default function ProductStand({ theme, themeIndex, swap, stageRef, onBuy, onExitComplete }) {
   // A press that changes something off in the corner needs to answer where the
   // finger is, not only where the cart is.
   const [added, setAdded] = useState(false)
@@ -88,7 +88,14 @@ export default function ProductStand({ theme, themeIndex, swap, stageRef, onBuy 
 
         <div className={styles.glow} aria-hidden="true" />
 
-        <AnimatePresence mode="popLayout" initial={false} custom={swap}>
+        <AnimatePresence
+          mode="popLayout"
+          initial={false}
+          custom={swap}
+          // Fires on the frame the outgoing jacket is actually removed, which a
+          // timer can only guess at.
+          onExitComplete={onExitComplete}
+        >
           <motion.img
             key={themeIndex}
             custom={swap}
