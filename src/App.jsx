@@ -4,6 +4,7 @@ import HeroSection from './components/HeroSection.jsx'
 import Stepper from './components/Stepper.jsx'
 import CartPanel from './components/CartPanel.jsx'
 import PerformanceView from './components/PerformanceView.jsx'
+import AboutView from './components/AboutView.jsx'
 import ProductStand from './components/ProductStand.jsx'
 import PurchasePanel from './components/PurchasePanel.jsx'
 import ColorThumbnail from './components/ColorThumbnail.jsx'
@@ -50,6 +51,7 @@ export default function App() {
   const thumbRef = useRef(null)
   const navRef = useRef(null)
   const performanceRef = useRef(null)
+  const aboutRef = useRef(null)
   const timersRef = useRef([])
 
   const clearTimers = () => {
@@ -143,7 +145,39 @@ export default function App() {
   // back where it came from -- a 400px flick on a 900px screen goes nowhere.
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    // A gesture is not over when a fixed timer says so. One swipe of a trackpad
+    // keeps sending events for a second or more as its momentum decays, and a
+    // timer that expires in the middle of that stream reads the rest of the
+    // same swipe as a second gesture -- measured, twenty flicks over two
+    // seconds skipped a whole section. So the lock is released only once the
+    // wheel has actually gone quiet, and never before the scroll has landed.
+    const QUIET = 160
+    const SETTLE = reduce ? 80 : 620
+    // How much wheel has to add up before it counts as a gesture. A mouse sends
+    // one big notch; a precision trackpad sends a stream of small ones, and
+    // some are only a pixel or two. Adding them up treats both the same.
+    const TRIGGER = 34
+    // And how far a finger has to travel on a touch screen to mean the same.
+    const SWIPE = 44
     let locked = false
+    let movedAt = 0
+    let idle
+    let rolled = 0
+    let touchedAt = null
+    // The size of the last wheel event, to tell a fresh push from the tail of
+    // the one before it.
+    let lastPush = 0
+
+    const release = () => {
+      const since = performance.now() - movedAt
+      if (since < SETTLE) {
+        idle = window.setTimeout(release, SETTLE - since)
+        return
+      }
+      locked = false
+      rolled = 0
+      lastPush = 0
+    }
 
     const sections = () => Array.from(document.querySelectorAll('[data-section]'))
     const move = (step) => {
@@ -152,20 +186,43 @@ export default function App() {
       const target = all[Math.min(all.length - 1, Math.max(0, here + step))]
       if (!target) return
       locked = true
+      movedAt = performance.now()
       target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
-      // Long enough to cover the smooth scroll, so the momentum of one flick
-      // cannot be read as a second gesture.
-      window.setTimeout(() => {
-        locked = false
-      }, reduce ? 80 : 760)
     }
 
     const onWheel = (event) => {
       // Anything that scrolls on its own -- the cart's list -- keeps its wheel.
       if (event.target.closest?.('[data-scrollable]')) return
-      if (Math.abs(event.deltaY) < 6) return
+      // Always, whatever the size. Letting small deltas through meant a
+      // trackpad's finer events scrolled the page natively a few pixels at a
+      // time and drifted it off the section boundaries.
       event.preventDefault()
-      if (!locked) move(event.deltaY > 0 ? 1 : -1)
+      // Every event restarts the quiet countdown, including the ones ignored
+      // while locked: that is what keeps a decaying swipe as one gesture.
+      window.clearTimeout(idle)
+      idle = window.setTimeout(release, QUIET)
+
+      // Some devices report lines rather than pixels.
+      const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY
+      const push = Math.abs(delta)
+      // Inertia only ever fades. An event markedly bigger than the one before
+      // is a finger pushing again, not the tail of the last swipe -- without
+      // this, a trackpad's decay could hold the lock for seconds and swallow
+      // the next deliberate gesture entirely.
+      const pushedAgain = push > lastPush * 1.5 + 2
+      lastPush = push
+
+      if (locked) {
+        if (!pushedAgain || performance.now() - movedAt < SETTLE) return
+        locked = false
+        rolled = 0
+      }
+
+      rolled += delta
+      if (Math.abs(rolled) < TRIGGER) return
+      const step = rolled > 0 ? 1 : -1
+      rolled = 0
+      move(step)
     }
 
     const KEYS = {
@@ -179,19 +236,52 @@ export default function App() {
       const step = KEYS[event.key]
       if (!step || event.target.closest?.('input, textarea')) return
       event.preventDefault()
-      if (!locked) move(step)
+      if (locked) return
+      move(step)
+      window.clearTimeout(idle)
+      idle = window.setTimeout(release, QUIET)
+    }
+
+    // A touch screen sends no wheel events at all, so without these the whole
+    // handler is simply absent on a laptop that has one: the page falls back to
+    // free scrolling and comes to rest between sections.
+    const onTouchStart = (event) => {
+      touchedAt = event.target.closest?.('[data-scrollable]') ? null : event.touches[0].clientY
+    }
+
+    const onTouchMove = (event) => {
+      if (touchedAt === null) return
+      event.preventDefault()
+    }
+
+    const onTouchEnd = (event) => {
+      if (touchedAt === null) return
+      const travelled = touchedAt - event.changedTouches[0].clientY
+      touchedAt = null
+      if (locked || Math.abs(travelled) < SWIPE) return
+      move(travelled > 0 ? 1 : -1)
+      window.clearTimeout(idle)
+      idle = window.setTimeout(release, QUIET)
     }
 
     window.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('keydown', onKey)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onTouchEnd)
     return () => {
+      window.clearTimeout(idle)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
     }
   }, [])
 
   const goTo = useCallback((target) => {
-    if (target === 'performance') performanceRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const section = { performance: performanceRef, about: aboutRef }[target]
+    if (section) section.current?.scrollIntoView({ behavior: 'smooth' })
     else window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [])
 
@@ -324,6 +414,10 @@ export default function App() {
 
       <section className={styles.section} ref={performanceRef} id="performance" data-section>
         <PerformanceView theme={theme} />
+      </section>
+
+      <section className={styles.section} ref={aboutRef} id="about" data-section>
+        <AboutView />
       </section>
 
       <CartPanel
