@@ -312,16 +312,16 @@
 }
 
 .shown .spanHeight {
-  animation: growDown 500ms cubic-bezier(0.16, 1, 0.3, 1) 100ms forwards;
+  animation: growDown 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .shown .spanWidth {
-  animation: growAcross 500ms cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards;
+  animation: growAcross 420ms cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards;
 }
 
 .shown .spec {
-  animation: slideIn 400ms ease-out forwards;
-  animation-delay: calc(200ms + var(--row) * 60ms);
+  animation: slideIn 340ms ease-out forwards;
+  animation-delay: calc(60ms + var(--row) * 45ms);
 }
 
 @keyframes growDown {

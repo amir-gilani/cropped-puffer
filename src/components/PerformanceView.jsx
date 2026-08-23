@@ -40,7 +40,8 @@ export default function PerformanceView({ theme }) {
         setShown(true)
         observer.disconnect()
       },
-      { threshold: 0.4 },
+      // Just enough of it on screen to know the reader is on the way.
+      { threshold: 0.12 },
     )
     observer.observe(node)
     return () => observer.disconnect()

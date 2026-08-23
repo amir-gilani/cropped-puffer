@@ -50,6 +50,7 @@ try {
   const targets = [
     ['top', null],
     ['performance', '#performance'],
+    ['about', '#about'],
   ]
   for (const [name, selector] of targets) {
     await page.evaluate((sel) => {

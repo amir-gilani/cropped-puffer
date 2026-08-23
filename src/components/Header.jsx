@@ -2,12 +2,10 @@ import { forwardRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import styles from './Header.module.css'
 
-// A view of null is a section that does not exist yet: shown, but plainly not
-// available, rather than a link that goes nowhere.
 const NAV_ITEMS = [
   { label: 'Overview', view: 'overview' },
   { label: 'Performance', view: 'performance' },
-  { label: 'About us', view: null },
+  { label: 'About us', view: 'about' },
 ]
 
 /** `activeNavRef` marks the docking slot the outgoing jacket flies into. */
