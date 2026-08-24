@@ -1,68 +1,85 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { NAV_FADE, TIMING } from '../animation.js'
+import { EDGE_FADE, ENTER_FADE, TIMING } from '../animation.js'
 import styles from './ProductStand.module.css'
 
 /**
- * Both variants read the docking geometry measured at click time, so the two
- * jackets always share one continuous diagonal:
+ * Both variants read the geometry measured at click time, so the two jackets
+ * always share one continuous diagonal:
  *
- *   corner thumbnail  <->  centre stage  <->  "PUFFER JACKET" nav item
+ *   corner thumbnail  <->  centre stage  <->  off the top of the screen
  *
- * Forward, the outgoing jacket shrinks up into the nav item while the next one
- * grows out of the corner thumbnail. Back, it runs exactly in reverse.
+ * Forward, the outgoing jacket shrinks away up the diagonal and out of the
+ * frame while the next one grows out of the corner thumbnail. Back, it runs
+ * exactly in reverse: the arriving jacket comes in over the top edge.
+ *
+ * On that leg the fade is spent crossing the edge and nowhere else: solid
+ * while it is properly on screen, gone by the time the frame would otherwise
+ * cut it in half. It used to dock onto the nav item and dissolve there
+ * instead, which had one jacket disappearing on the spot and the other
+ * appearing on it.
  */
-const dock = ({ thumb, nav }, direction) => (direction > 0 ? nav : thumb)
-const source = ({ thumb, nav }, direction) => (direction > 0 ? thumb : nav)
+const dock = ({ thumb, above }, direction) => (direction > 0 ? above : thumb)
+const source = ({ thumb, above }, direction) => (direction > 0 ? thumb : above)
 
 const jacketVariants = {
   enter: (swap) => ({
     ...source(swap, swap.direction),
-    // Coming forward it starts exactly on the corner thumbnail, which switches
-    // off at the same instant, so it is already solid there -- the new colour
-    // is on screen from the first frame instead of fading up during the trip.
-    // Coming back it starts on the nav item with nothing underneath it, so
-    // there it does fade in rather than popping into existence.
+    // Forward it starts exactly on the corner thumbnail, which switches off at
+    // the same instant, so it has to be solid there. Back it starts outside the
+    // frame and comes up as it crosses the edge.
     opacity: swap.direction > 0 ? 1 : 0,
   }),
-  center: {
+  center: (swap) => ({
     x: 0,
     y: 0,
     scale: 1,
+    // The other half of the edge fade. Forward there is nothing to fade -- the
+    // jacket is already solid on the corner it grows out of.
     opacity: 1,
     transition: {
       delay: TIMING.enterDelay,
       duration: TIMING.enterDuration,
       ease: [0.16, 1, 0.3, 1],
-    },
-  },
-  exit: (swap) =>
-    swap.direction > 0
-      ? {
-          // Docking into the nav item, with nothing underneath to take over,
-          // so it fades out across the tail of the trip.
-          ...dock(swap, swap.direction),
-          opacity: [1, 1, 0],
-          transition: {
-            duration: TIMING.exitDuration,
-            ease: [0.16, 1, 0.3, 1],
+      ...(swap.direction > 0
+        ? {}
+        : {
+            // A plain tween over the stretch the jacket spends at the edge, not
+            // keyframes: a keyframe list whose first segment has no duration
+            // came back down again afterwards instead of holding. ENTER_FADE is
+            // a window into the move, not a single number, so it gives both when
+            // the fade starts and how long it lasts -- multiplying the pair
+            // itself by the duration is NaN, and a NaN duration is an animation
+            // that never runs at all.
             opacity: {
-              duration: TIMING.exitDuration,
-              times: [0, NAV_FADE, 1],
+              delay: TIMING.enterDelay + ENTER_FADE[0] * TIMING.enterDuration,
+              duration: (ENTER_FADE[1] - ENTER_FADE[0]) * TIMING.enterDuration,
               ease: 'linear',
             },
-          },
-        }
-      : {
-          // Landing in the corner slot: stays solid all the way down, and is
-          // removed once the thumbnail underneath has taken over unnoticed.
-          ...dock(swap, swap.direction),
-          opacity: 1,
-          transition: {
-            duration: TIMING.exitDuration,
-            ease: [0.16, 1, 0.3, 1],
-          },
-        },
+          }),
+    },
+  }),
+  exit: (swap) => ({
+    ...dock(swap, swap.direction),
+    // Going back it lands in the corner and has to stay solid the whole way,
+    // because a thumbnail takes over from it there. Going forward it leaves
+    // through the top edge, and fades as it crosses -- gone by the time the
+    // frame would have cut it off, rather than snipped off mid-flight.
+    opacity: swap.direction > 0 ? [1, 1, 0] : 1,
+    transition: {
+      duration: TIMING.exitDuration,
+      ease: [0.16, 1, 0.3, 1],
+      ...(swap.direction > 0
+        ? {
+            opacity: {
+              duration: TIMING.exitDuration,
+              times: [0, EDGE_FADE[0], EDGE_FADE[1]],
+              ease: ['linear', 'linear'],
+            },
+          }
+        : {}),
+    },
+  }),
 }
 
 export default function ProductStand({ theme, themeIndex, swap, stageRef, onBuy, onExitComplete }) {

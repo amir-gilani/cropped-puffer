@@ -29,14 +29,31 @@ what changes between colourways.
 Clicking an arrow moves one place along the sequence — linear, not a loop, and
 `isAnimating` ignores clicks while one is in flight.
 
-The two jackets ride a single diagonal with a docking slot at each end: the
-corner thumbnail below right, the first nav item above. Forward, the outgoing
-jacket rides up into the nav and the next grows out of the thumbnail; back, it
-runs exactly in reverse. **The path is measured, never hardcoded** —
-`getBoundingClientRect()` on the stage, the thumbnail and the nav item at click
-time gives the offsets and the scale, so it stays exact at any viewport size.
-Because both images are `object-fit: contain`, the scale compares the *fitted*
-rects, not the boxes.
+The two jackets ride a single diagonal between the corner thumbnail below right
+and the top edge of the screen. Forward, the outgoing jacket shrinks away up
+that diagonal and out of the frame while the next grows out of the thumbnail;
+back, it runs exactly in reverse — the arriving jacket comes in over the top
+edge and the outgoing one docks in the corner.
+
+On the upper leg the only fade is the one spent crossing the edge itself
+(`EDGE_FADE` leaving, `ENTER_FADE` arriving), so a jacket is solid for as long
+as it is properly on screen and gone by the moment the frame would otherwise
+cut it in half. **The two windows are not mirrors of each other in time**, even
+though the path is: everything eases *out*, so both jackets cover most of the
+distance in the first fraction of the trip. Leaving, the edge crossing occupies
+68–98% of the path, which ease-out-expo reaches between a fifth and a half of
+the duration; arriving, the same two points are 4% and 40% of the path, which
+the same curve reaches in the first tenth of it. Both are time windows into the
+move, so each is a `[start, end]` pair, not a single number.
+
+**The path is measured, never hardcoded** — `getBoundingClientRect()` on the
+stage, the thumbnail and the nav item at click time gives the offsets and the
+scale, so it stays exact at any viewport size. The nav item now only sets the
+sideways aim of the exit; how far above the edge the jacket has to travel comes
+from its own drawn height at the scale it has by then. Because both images are
+`object-fit: contain`, the scale compares the *fitted* rects, not the boxes —
+and on the corner it is the thumbnail's `img` that is measured, not the button
+around it, which is a pixel and a half taller than its box.
 
 The background and text colours ride CSS custom properties with their own
 150ms-delayed transition, so the colour change trails the departing jacket by a

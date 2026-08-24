@@ -10,10 +10,10 @@ export const TIMING = {
   backgroundDelayMs: 150,
 }
 
-// The jacket rides one diagonal conveyor with a docking slot at each end:
-// the corner thumbnail at the bottom right, the "PUFFER JACKET" nav item at the
-// top. It never shoots off screen -- it shrinks into whichever slot it is
-// heading for and hands over there.
+// The jacket rides one diagonal conveyor between the corner thumbnail at the
+// bottom right and the top edge of the screen. Downward it docks: it shrinks
+// onto the thumbnail and hands over there. Upward it simply leaves, shrinking
+// away up the diagonal and out of the frame.
 
 // Going back, the jacket lands in the corner slot and stays fully opaque the
 // whole way: cross-fading it with the thumbnail would NOT hold a constant
@@ -22,18 +22,37 @@ export const TIMING = {
 // back to solid. The thumbnail is put back on the frame the jacket is removed
 // instead, so only one of them is ever in that corner.
 
-// Going forward, the jacket docks into the nav item with nothing underneath to
-// take over, so there it really does fade -- from this point on the trip.
-export const NAV_FADE = 0.78
+// On the upper leg the jacket fades as it crosses the top edge, rather than
+// dissolving on the spot or being cut off by the frame at full strength.
+//
+// The two windows are not mirror images of each other, because the easing is
+// not symmetric in time: everything here eases *out*, so both jackets cover
+// most of the distance in the first fraction of the trip.
+//
+// Leaving, the top of the jacket reaches the edge about 68% of the way along
+// the path and the last of it clears at about 98%; under ease-out-expo those
+// land at roughly a fifth and a half of the duration.
+export const EDGE_FADE = [0.2, 0.52]
+
+// Arriving, the same two points are about 4% and 40% of the path -- which the
+// same curve reaches in the first breath of the move. So the fade in is quick:
+// any longer and the jacket is solidly inside the frame while still half there.
+//
+// Both of these are `[start, end]` windows in *time*, as a fraction of the
+// leg's duration -- not single numbers. Read one as a scalar and the arithmetic
+// silently becomes NaN, which Framer Motion turns into an opacity that never
+// animates: the whole return leg then has the jacket arrive invisible.
+export const ENTER_FADE = [0, 0.1]
 
 // Going forward, the corner returns with a colour that was not there before,
 // so it genuinely fades in rather than being swapped under cover.
 export const THUMB_FADE_S = 0.3
 
-// Where along the nav item the jacket aims, as a fraction of its width:
-// 0 is the left edge of the label, 0.5 its centre. Negative nudges it further
-// left, past the start of the pill.
-export const NAV_ANCHOR = -0.7
+// The sideways aim on the way out, as a fraction of the first nav item's
+// width: 0 is the left edge of its label, 0.5 its centre. Negative carries the
+// jacket further left, past the start of the pill. The jacket no longer stops
+// there -- this only sets how slanted the diagonal out of the frame is.
+export const NAV_ANCHOR = -1.6
 
 // Fallback aspect ratio, used only if the thumbnail image has not decoded yet
 // when the first swap fires. Real value is read from the PNG at run time.

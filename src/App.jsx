@@ -45,7 +45,7 @@ export default function App() {
   // through AnimatePresence's `custom`, so it never goes stale mid-swap.
   const [swap, setSwap] = useState({
     thumb: { x: 0, y: 0, scale: 0.3 },
-    nav: { x: 0, y: 0, scale: 0.3 },
+    above: { x: 0, y: 0, scale: 0.3 },
     direction: 1,
   })
 
@@ -89,9 +89,15 @@ export default function App() {
   }, [])
 
   /**
-   * The two docking slots, as offsets from the centre of the stage: the corner
-   * thumbnail below right, and the "PUFFER JACKET" nav item above. Measured on
-   * every click, so the path stays exact at any viewport size.
+   * The two ends of the jacket's travel, as offsets from the centre of the
+   * stage: the corner thumbnail below right, and clear of the top edge above.
+   * Measured on every click, so the path stays exact at any viewport size.
+   *
+   * The upper end used to be the nav item itself -- the jacket shrank onto it
+   * and faded out there. It leaves the screen instead now, so nothing has to
+   * fade: the frame's own edge takes it. The nav item still sets the sideways
+   * aim, so the diagonal is the one it always was; the jacket simply carries
+   * on past it.
    */
   const measure = useCallback(() => {
     const stage = stageRef.current?.getBoundingClientRect()
@@ -120,6 +126,12 @@ export default function App() {
         ? { width: box.height * ratio, height: box.height }
         : { width: box.width, height: box.width / ratio }
     const drawn = stage?.width ? fitted(stage).width : 0
+    const drawnHeight = stage?.width ? fitted(stage).height : 0
+
+    // Above the frame: how far the centre has to go for the whole jacket to be
+    // past the top edge at the size it is by then, plus a little margin so it
+    // is gone rather than only just gone.
+    const overhead = (scale) => -(cy + (drawnHeight * scale) / 2 + 24)
 
     return {
       thumb:
@@ -132,16 +144,19 @@ export default function App() {
             }
           : // Mobile: no thumbnail on screen, so travel off the bottom right.
             { x: window.innerWidth * 0.6, y: window.innerHeight * 0.6, scale: 0.3 },
-      nav:
+      above:
         nav?.width && drawn
           ? {
-              // Aim at the left part of the label, not its centre.
+              // The nav item still sets the sideways aim: left of its label,
+              // not at its centre.
               x: nav.left + nav.width * NAV_ANCHOR - cx,
-              y: nav.top + nav.height / 2 - cy,
+              y: overhead(nav.width / drawn),
+              // Still the size it would have been at the nav item, so the
+              // jacket is well into the distance by the time the edge takes it.
               scale: nav.width / drawn,
             }
-          : // Mobile: the nav is hidden, so dock off the top of the screen.
-            { x: -window.innerWidth * 0.25, y: -window.innerHeight * 0.6, scale: 0.3 },
+          : // Mobile: the nav is hidden, so there is nothing to aim by.
+            { x: -window.innerWidth * 0.25, y: overhead(0.3) || -window.innerHeight * 0.6, scale: 0.3 },
     }
   }, [])
 
