@@ -8,6 +8,10 @@
   padding: 0;
   display: grid;
   place-items: center;
+  /* Driven from the component: the duration is what changes, and a duration of
+     0 has to mean "this paint", not "the next frame". */
+  transition-property: opacity;
+  transition-timing-function: linear;
 }
 
 .thumb img {

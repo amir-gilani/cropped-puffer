@@ -13,10 +13,12 @@ import styles from './App.module.css'
 import {
   JACKET_RATIO,
   NAV_ANCHOR,
+  CORNER_SWAP_MS,
   EXIT_MS,
   PREVIEW_MS,
   SWAP_MS,
   THUMB_FADE_S,
+  THUMB_FADE_OUT_S,
 } from './animation.js'
 
 // The corner always holds the colourway the right arrow would bring in next --
@@ -32,7 +34,7 @@ export default function App() {
   // jacket already parked on top of it, so any fade would show.
   const [thumbFadeIn, setThumbFadeIn] = useState(THUMB_FADE_S)
   // Switching off is instant when a solid jacket is already covering that spot.
-  const [thumbFadeOut, setThumbFadeOut] = useState(0.2)
+  const [thumbFadeOut, setThumbFadeOut] = useState(THUMB_FADE_OUT_S)
   // True for the sliver of time a landed jacket is still sitting on the corner.
   // The size lives here rather than in the panel that shows it, because the
   // Buy button under the jacket needs it too.
@@ -55,6 +57,7 @@ export default function App() {
   const performanceRef = useRef(null)
   const aboutRef = useRef(null)
   const timersRef = useRef([])
+  const decodedRef = useRef([])
 
   const clearTimers = () => {
     timersRef.current.forEach(clearTimeout)
@@ -71,6 +74,12 @@ export default function App() {
     const decode = (jacket) => {
       const preload = new Image()
       preload.src = jacket
+      // Held, not dropped. A decoded bitmap only lives as long as something
+      // references the image it belongs to, so letting these fall out of scope
+      // hands the decode straight back to the collector -- and the bill then
+      // arrives again on the frame the colourway is next shown, which is
+      // mid-swap.
+      decodedRef.current.push(preload)
       // Fetching is not decoding. Left at the fetch, the first paint of a
       // colourway still pays to turn 800KB of PNG into a bitmap, and that bill
       // arrives on the frame it is first shown -- which is mid-swap, on the
@@ -350,7 +359,7 @@ export default function App() {
       setThumbHidden(true)
 
       setThumbFadeIn(direction > 0 ? THUMB_FADE_S : 0)
-      setThumbFadeOut(direction > 0 ? 0 : 0.2)
+      setThumbFadeOut(direction > 0 ? 0 : THUMB_FADE_OUT_S)
 
       // Going forward, the corner is emptied and previews the next colourway as
       // soon as the incoming jacket has cleared that slot -- waiting for the
@@ -369,6 +378,14 @@ export default function App() {
             setPreviewIndex(previewFor(target))
             setThumbHidden(false)
           }, PREVIEW_MS),
+        // Going back, the corner's own image is changed here rather than at the
+        // hand-over: by now it has finished fading out, so the change is unseen,
+        // and the rest of the exit is left for the browser to decode it. Doing
+        // it at the hand-over meant the one frame the jacket was removed was
+        // also the frame the `img` threw away its bitmap -- an empty corner, and
+        // a visible wink exactly as the jacket touched down.
+        direction < 0 &&
+          setTimeout(() => setPreviewIndex(previewFor(target)), CORNER_SWAP_MS),
         // Safety net: if the exit never completes -- an interrupted swap --
         // the corner must not be left empty.
         direction < 0 && setTimeout(() => revealCorner(target), EXIT_MS + 400),

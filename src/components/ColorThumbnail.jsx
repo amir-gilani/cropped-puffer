@@ -29,12 +29,23 @@ const ColorThumbnail = forwardRef(function ColorThumbnail(
       // well as out of sight, or the empty corner steps the colourway.
       aria-hidden={hidden || undefined}
       tabIndex={hidden ? -1 : 0}
-      style={{ pointerEvents: hidden ? 'none' : 'auto' }}
+      // Opacity is a plain CSS transition and NOT a Framer animation, because
+      // on the way back this has to be able to switch on *now*, in the same
+      // paint as the landed jacket being removed. Framer picks an `animate`
+      // change up in a layout effect and lands the value on its next frame --
+      // so even at `duration: 0` the corner was empty for one painted frame,
+      // which is the wink you see as the jacket touches down. React writes a
+      // `style` in the commit itself, and React batches that state change with
+      // the removal, so the two happen in one frame with no hole between them.
+      //
+      // Framer still owns `transform` for the hover lift; the two never write
+      // the same property.
+      style={{
+        pointerEvents: hidden ? 'none' : 'auto',
+        opacity: hidden ? 0 : 1,
+        transitionDuration: `${hidden ? fadeOut : fadeIn}s`,
+      }}
       initial={false}
-      animate={{ opacity: hidden ? 0 : 1 }}
-      // `fadeIn` of 0 means it appears on the very next frame -- the caller
-      // uses that when a jacket has already landed on this exact spot.
-      transition={{ duration: hidden ? fadeOut : fadeIn, ease: 'linear' }}
       whileHover={{ y: -4 }}
     >
       <img src={theme.jacket} alt="" draggable="false" />

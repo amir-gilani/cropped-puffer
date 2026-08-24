@@ -48,6 +48,18 @@ export const ENTER_FADE = [0, 0.1]
 // so it genuinely fades in rather than being swapped under cover.
 export const THUMB_FADE_S = 0.3
 
+// Going back, nothing is covering the corner when the swap starts, so it has to
+// fade out under its own steam before the jacket gets there.
+export const THUMB_FADE_OUT_S = 0.2
+
+// And when the image behind it is changed -- once that fade-out has finished,
+// so it happens unseen. It must NOT happen on the hand-over frame: swapping an
+// `img`'s `src` throws away the bitmap it is showing, and the replacement is
+// several hundred KB of PNG that may not be ready in the same frame. Landing
+// that on the one frame the flying jacket is removed empties the corner
+// completely. Doing it here leaves most of the exit for the decode.
+export const CORNER_SWAP_MS = THUMB_FADE_OUT_S * 1000 + 60
+
 // The sideways aim on the way out, as a fraction of the first nav item's
 // width: 0 is the left edge of its label, 0.5 its centre. Negative carries the
 // jacket further left, past the start of the pill. The jacket no longer stops
