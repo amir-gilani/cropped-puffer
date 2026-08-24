@@ -22,27 +22,17 @@ export const TIMING = {
 // back to solid. The thumbnail is put back on the frame the jacket is removed
 // instead, so only one of them is ever in that corner.
 
-// On the upper leg the jacket fades as it crosses the top edge, rather than
-// dissolving on the spot or being cut off by the frame at full strength.
+// Nothing fades on the upper leg, in either direction. `.screen` is already
+// `overflow: hidden`, so the edge of the screen ends the jacket by itself --
+// adding a fade on top of that was a second mechanism doing the same job, and
+// the two had to agree about *when* the crossing happens.
 //
-// The two windows are not mirror images of each other, because the easing is
-// not symmetric in time: everything here eases *out*, so both jackets cover
-// most of the distance in the first fraction of the trip.
-//
-// Leaving, the top of the jacket reaches the edge about 68% of the way along
-// the path and the last of it clears at about 98%; under ease-out-expo those
-// land at roughly a fifth and a half of the duration.
-export const EDGE_FADE = [0.2, 0.52]
-
-// Arriving, the same two points are about 4% and 40% of the path -- which the
-// same curve reaches in the first breath of the move. So the fade in is quick:
-// any longer and the jacket is solidly inside the frame while still half there.
-//
-// Both of these are `[start, end]` windows in *time*, as a fraction of the
-// leg's duration -- not single numbers. Read one as a scalar and the arithmetic
-// silently becomes NaN, which Framer Motion turns into an opacity that never
-// animates: the whole return leg then has the jacket arrive invisible.
-export const ENTER_FADE = [0, 0.1]
+// They could not stay agreed. The crossing point is a function of NAV_ANCHOR:
+// move the aim and the jacket leaves through a different part of the edge, at a
+// different moment, so every hardcoded fade window is stale the moment the
+// diagonal is re-aimed -- and a fade tuned for the old path has the arriving
+// jacket coming up mid-air rather than at the edge it actually crosses. Letting
+// the clip do it is exact at any anchor, and mirrors for free.
 
 // Going forward, the corner returns with a colour that was not there before,
 // so it genuinely fades in rather than being swapped under cover.
@@ -64,7 +54,11 @@ export const CORNER_SWAP_MS = THUMB_FADE_OUT_S * 1000 + 60
 // width: 0 is the left edge of its label, 0.5 its centre. Negative carries the
 // jacket further left, past the start of the pill. The jacket no longer stops
 // there -- this only sets how slanted the diagonal out of the frame is.
-export const NAV_ANCHOR = -1.6
+//
+// One step further left than the nav item's own width, so the climb leans a
+// little more across the screen instead of going up almost square. The arriving
+// jacket reads the same number, so the two legs stay one straight line.
+export const NAV_ANCHOR = -2.1
 
 // Fallback aspect ratio, used only if the thumbnail image has not decoded yet
 // when the first swap fires. Real value is read from the PNG at run time.

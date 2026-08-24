@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { EDGE_FADE, ENTER_FADE, TIMING } from '../animation.js'
+import { TIMING } from '../animation.js'
 import styles from './ProductStand.module.css'
 
 /**
@@ -13,71 +13,42 @@ import styles from './ProductStand.module.css'
  * frame while the next one grows out of the corner thumbnail. Back, it runs
  * exactly in reverse: the arriving jacket comes in over the top edge.
  *
- * On that leg the fade is spent crossing the edge and nowhere else: solid
- * while it is properly on screen, gone by the time the frame would otherwise
- * cut it in half. It used to dock onto the nav item and dissolve there
- * instead, which had one jacket disappearing on the spot and the other
- * appearing on it.
+ * Both legs of that trip are the same line read in opposite directions --
+ * `above` is one number, measured once per click, and the departing jacket
+ * aims at it while the arriving one starts from it. So re-aiming the diagonal
+ * re-aims both ends together; there is nothing to keep in step by hand.
+ *
+ * It used to dock onto the nav item and dissolve there instead, which had one
+ * jacket disappearing on the spot and the other appearing on it.
  */
 const dock = ({ thumb, above }, direction) => (direction > 0 ? above : thumb)
 const source = ({ thumb, above }, direction) => (direction > 0 ? thumb : above)
 
+// Opacity never appears below, in either direction, and that is the point: a
+// jacket is solid for every frame it is on screen. `.screen` is
+// `overflow: hidden`, so the edge of the screen is what ends one leaving and
+// what uncovers one arriving. Fading as well meant keeping a hardcoded window
+// in step with where the diagonal actually crosses that edge -- which moves
+// whenever NAV_ANCHOR is re-aimed, so the window went stale and the arriving
+// jacket came up in mid-air instead of at the edge. The clip is exact at any
+// anchor, and mirrors the two legs for free.
 const jacketVariants = {
-  enter: (swap) => ({
-    ...source(swap, swap.direction),
-    // Forward it starts exactly on the corner thumbnail, which switches off at
-    // the same instant, so it has to be solid there. Back it starts outside the
-    // frame and comes up as it crosses the edge.
-    opacity: swap.direction > 0 ? 1 : 0,
-  }),
-  center: (swap) => ({
+  enter: (swap) => source(swap, swap.direction),
+  center: {
     x: 0,
     y: 0,
     scale: 1,
-    // The other half of the edge fade. Forward there is nothing to fade -- the
-    // jacket is already solid on the corner it grows out of.
-    opacity: 1,
     transition: {
       delay: TIMING.enterDelay,
       duration: TIMING.enterDuration,
       ease: [0.16, 1, 0.3, 1],
-      ...(swap.direction > 0
-        ? {}
-        : {
-            // A plain tween over the stretch the jacket spends at the edge, not
-            // keyframes: a keyframe list whose first segment has no duration
-            // came back down again afterwards instead of holding. ENTER_FADE is
-            // a window into the move, not a single number, so it gives both when
-            // the fade starts and how long it lasts -- multiplying the pair
-            // itself by the duration is NaN, and a NaN duration is an animation
-            // that never runs at all.
-            opacity: {
-              delay: TIMING.enterDelay + ENTER_FADE[0] * TIMING.enterDuration,
-              duration: (ENTER_FADE[1] - ENTER_FADE[0]) * TIMING.enterDuration,
-              ease: 'linear',
-            },
-          }),
     },
-  }),
+  },
   exit: (swap) => ({
     ...dock(swap, swap.direction),
-    // Going back it lands in the corner and has to stay solid the whole way,
-    // because a thumbnail takes over from it there. Going forward it leaves
-    // through the top edge, and fades as it crosses -- gone by the time the
-    // frame would have cut it off, rather than snipped off mid-flight.
-    opacity: swap.direction > 0 ? [1, 1, 0] : 1,
     transition: {
       duration: TIMING.exitDuration,
       ease: [0.16, 1, 0.3, 1],
-      ...(swap.direction > 0
-        ? {
-            opacity: {
-              duration: TIMING.exitDuration,
-              times: [0, EDGE_FADE[0], EDGE_FADE[1]],
-              ease: ['linear', 'linear'],
-            },
-          }
-        : {}),
     },
   }),
 }

@@ -35,16 +35,15 @@ that diagonal and out of the frame while the next grows out of the thumbnail;
 back, it runs exactly in reverse — the arriving jacket comes in over the top
 edge and the outgoing one docks in the corner.
 
-On the upper leg the only fade is the one spent crossing the edge itself
-(`EDGE_FADE` leaving, `ENTER_FADE` arriving), so a jacket is solid for as long
-as it is properly on screen and gone by the moment the frame would otherwise
-cut it in half. **The two windows are not mirrors of each other in time**, even
-though the path is: everything eases *out*, so both jackets cover most of the
-distance in the first fraction of the trip. Leaving, the edge crossing occupies
-68–98% of the path, which ease-out-expo reaches between a fifth and a half of
-the duration; arriving, the same two points are 4% and 40% of the path, which
-the same curve reaches in the first tenth of it. Both are time windows into the
-move, so each is a `[start, end]` pair, not a single number.
+Nothing fades on the upper leg, in either direction. `.screen` is
+`overflow: hidden`, so the edge of the screen is already what ends a jacket
+leaving and what uncovers one arriving — both are at full strength for every
+frame they can be seen. There were fade windows here once; they were a second
+mechanism doing the clip's job, and they had to agree with it about *when* the
+diagonal crosses the edge. That moment is a function of `NAV_ANCHOR`, so
+re-aiming the diagonal left the windows stale and the arriving jacket came up
+in mid-air instead of at the edge. **If you find yourself hardcoding where the
+jacket crosses the frame, the clip is already doing it.**
 
 **The path is measured, never hardcoded** — `getBoundingClientRect()` on the
 stage, the thumbnail and the nav item at click time gives the offsets and the
