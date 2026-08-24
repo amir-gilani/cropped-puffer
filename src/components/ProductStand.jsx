@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { TIMING } from '../animation.js'
+import { playAdded } from '../sound.js'
 import styles from './ProductStand.module.css'
 
 /**
@@ -106,6 +107,9 @@ export default function ProductStand({ theme, themeIndex, swap, stageRef, onBuy,
           onClick={() => {
             onBuy()
             setAdded(true)
+            // Last, and never awaited: a browser that blocks audio, or has none,
+            // must not be able to stop the thing actually being added.
+            playAdded()
           }}
         >
           {/* Keyed, so the old label leaves and the new one arrives instead of
