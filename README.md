@@ -3,6 +3,8 @@
 A single-page storefront for one jacket in five colourways. No routing, no
 backend — the whole thing is one screen driven by React state.
 
+![The storefront in four of its five colourways](docs/preview.jpg)
+
 The interesting part is not the shop. It is that every transition is measured
 from the live layout at the moment it starts, so nothing in it breaks when the
 window is a different size.
@@ -14,6 +16,22 @@ npm run dev
 
 Then open the address Vite prints. `npm run build` produces a static `dist/`
 that any host will serve as-is.
+
+## Demo
+
+_Recording of the colourway swap — to come._
+
+<!-- Put the recording at docs/demo.gif, then delete this comment and the line
+     above, and uncomment the line below.
+
+     It has to be a GIF to play inline from a path like this: GitHub will not
+     play a .mov or .mp4 referenced as an image. The alternative is to drag the
+     video onto an issue or release, which uploads it and gives back a
+     user-images.githubusercontent.com URL that does play inline.
+
+     Keep it under about 10MB, or the README gets slow to open on a phone. -->
+
+<!-- ![The colourway swap](docs/demo.gif) -->
 
 ---
 
