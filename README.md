@@ -19,9 +19,11 @@ that any host will serve as-is.
 
 ## Demo
 
-_Recording of the colourway swap — to come._
+Stepping through the colourways. The jacket rides one measured diagonal between
+the corner thumbnail and the top edge of the screen, and the background, the
+lighting and the price follow it.
 
-<img width="800" height="358" alt="IMG_7339-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/b7306b88-35d4-4fff-87a1-30040f5370b3" />
+<img width="800" height="358" alt="The colourway swap: one jacket leaving up the diagonal while the next grows out of the corner thumbnail" src="https://github.com/user-attachments/assets/b7306b88-35d4-4fff-87a1-30040f5370b3" />
 
 ---
 
