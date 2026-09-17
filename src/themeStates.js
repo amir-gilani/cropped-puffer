@@ -13,6 +13,13 @@ import jacketBlack from './assets/jacket-black.png'
  * for the same reason: pure black over maroon reads as dirt, a deep plum of the
  * same family reads as shadow.
  *
+ * `cloth` is the colourway's own colour, used by the thermal meter on the
+ * specification screen. It is not the fabric's literal RGB: the meter is filled
+ * over `background`, and every background here is a deep version of the
+ * colourway it belongs to, so the literal value would sit on its own shade and
+ * disappear. These are lifted away from their background far enough to read --
+ * darker on the one light theme, lighter on the four dark ones.
+ *
  * All five are the same photographed jacket, recoloured -- see
  * scripts/prepare-jackets.mjs.
  *
@@ -30,6 +37,7 @@ export const themeStates = [
     was: 199,
     name: 'Coconut Milk',
     jacket: jacketCream,
+    cloth: '#96835a',
     background: '#e6e0d3',
     text: '#17161a',
     muted: 'rgba(23, 22, 26, 0.55)',
@@ -48,6 +56,7 @@ export const themeStates = [
     was: 209,
     name: 'Gym Red',
     jacket: jacketRed,
+    cloth: '#c03a44',
     background: '#4a1116',
     text: '#f6ecec',
     muted: 'rgba(246, 236, 236, 0.6)',
@@ -66,6 +75,7 @@ export const themeStates = [
     was: 215,
     name: 'Cargo Khaki',
     jacket: jacketOlive,
+    cloth: '#8a9455',
     background: '#2f3524',
     text: '#eef0e4',
     muted: 'rgba(238, 240, 228, 0.58)',
@@ -84,6 +94,7 @@ export const themeStates = [
     was: 220,
     name: 'Midnight Navy',
     jacket: jacketNavy,
+    cloth: '#4c68b4',
     background: '#161e34',
     text: '#e8edf7',
     muted: 'rgba(232, 237, 247, 0.58)',
@@ -102,6 +113,7 @@ export const themeStates = [
     was: 229,
     name: 'Onyx',
     jacket: jacketBlack,
+    cloth: '#6e727c',
     background: '#111113',
     text: '#ffffff',
     muted: 'rgba(255, 255, 255, 0.55)',

@@ -430,6 +430,8 @@ export default function App() {
         '--nav-bar': theme.navBar,
         '--nav-text': theme.navText,
         '--shadow': theme.shadow,
+        // The colourway's own colour, for the meter on the specification screen.
+        '--cloth': theme.cloth,
         '--glow': theme.glow,
         '--glow-color': theme.glowColor,
         '--vignette': theme.vignette,
@@ -490,7 +492,7 @@ export default function App() {
       </section>
 
       <section className={styles.section} ref={performanceRef} id="performance" data-section>
-        <PerformanceView theme={theme} />
+        <PerformanceView />
       </section>
 
       <section className={styles.section} ref={aboutRef} id="about" data-section>

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { JACKET_RATIO } from '../animation.js'
+import { useEffect, useRef, useState } from 'react'
+import ThermalScale from './ThermalScale.jsx'
 import styles from './PerformanceView.module.css'
 
 /**
@@ -11,6 +11,14 @@ import styles from './PerformanceView.module.css'
  * interesting part -- the numbers -- in the smallest type on the page, left a
  * long empty channel down the middle of every row, and said several things
  * twice. Here the specification *is* the typography.
+ *
+ * The left of the screen used to hold a photograph of the jacket, registered
+ * with crop marks and measured with dimension lines. It went because it was the
+ * weakest thing on the page: the first screen shows the garment better, and
+ * this screen is about how the garment performs, which no picture of it can
+ * say. What stands there now is the headline claim drawn as the range it
+ * actually is -- see ThermalScale. The plate's furniture stayed, because crop
+ * marks and a figure number belong to the page rather than to the photograph.
  */
 const FIGURES = [
   { label: 'Fill', value: '800', unit: 'FP', note: 'Responsible down' },
@@ -21,7 +29,7 @@ const FIGURES = [
   { label: 'Repair', value: '5', unit: 'yr', note: 'Free, whatever happened' },
 ]
 
-export default function PerformanceView({ theme }) {
+export default function PerformanceView() {
   // One observer and a class, rather than an animation library instance per
   // element. These are one-shot reveals of transform and opacity, which CSS
   // hands to the compositor -- seven JS animations were writing styles every
@@ -45,113 +53,27 @@ export default function PerformanceView({ theme }) {
     return () => observer.disconnect()
   }, [shown])
 
-  /**
-   * Where the artwork is actually drawn inside the plate. The image is
-   * `object-fit: contain`, so its box and its picture are two different
-   * rectangles -- and everything else on this plate is a measurement *of the
-   * garment*, so all of it hangs off the picture. Pinned to the box instead,
-   * the dimension lines ran along the edges of the screen and read as page
-   * furniture rather than as a spec.
-   *
-   * Handed to CSS as four custom properties, so the marks are laid out by the
-   * stylesheet and only their origin comes from JS.
-   */
-  const plateRef = useRef(null)
-  const imageRef = useRef(null)
-  const [drawn, setDrawn] = useState(null)
-
-  const measure = useCallback(() => {
-    const plate = plateRef.current
-    const image = imageRef.current
-    if (!plate || !image) return
-    const box = image.getBoundingClientRect()
-    const frame = plate.getBoundingClientRect()
-    if (!box.width || !box.height) return
-
-    const ratio =
-      image.naturalWidth && image.naturalHeight
-        ? image.naturalWidth / image.naturalHeight
-        : JACKET_RATIO
-    // The fitted picture: as large as it can be inside the box at its own
-    // ratio, and centred there, which is what leaves the two side margins.
-    const fitted =
-      box.width / box.height > ratio
-        ? { width: box.height * ratio, height: box.height }
-        : { width: box.width, height: box.width / ratio }
-
-    setDrawn({
-      x: Math.round(box.left - frame.left + (box.width - fitted.width) / 2),
-      y: Math.round(box.top - frame.top + (box.height - fitted.height) / 2),
-      width: Math.round(fitted.width),
-      height: Math.round(fitted.height),
-    })
-  }, [])
-
-  useEffect(() => {
-    const plate = plateRef.current
-    if (!plate) return undefined
-    measure()
-    // The plate is sized in vw and vh, so every resize moves the picture inside
-    // it -- and the first measurement can land before the image has decoded,
-    // when its natural size is not known yet.
-    const observer = new ResizeObserver(measure)
-    observer.observe(plate)
-    const image = imageRef.current
-    image?.addEventListener('load', measure)
-    return () => {
-      observer.disconnect()
-      image?.removeEventListener('load', measure)
-    }
-  }, [measure])
-
   return (
     <section className={shown ? `${styles.view} ${styles.shown}` : styles.view} ref={ref}>
-      <figure
-        className={styles.plate}
-        ref={plateRef}
-        style={
-          drawn
-            ? {
-                '--dx': `${drawn.x}px`,
-                '--dy': `${drawn.y}px`,
-                '--dw': `${drawn.width}px`,
-                '--dh': `${drawn.height}px`,
-              }
-            : undefined
-        }
-      >
-        <img
-          className={styles.jacket}
-          ref={imageRef}
-          src={theme.jacket}
-          alt={`${theme.name} puffer jacket`}
-        />
+      <figure className={styles.plate}>
+        {/* The graphic and its registration, measured by nothing: the crop
+            marks sit on this box, which *is* the artwork's box. A photograph
+            drew smaller than the element holding it, so all of this used to
+            have to be measured in JS and handed back to CSS as four custom
+            properties before a single mark could be placed. */}
+        <div className={styles.field}>
+          <ThermalScale shown={shown} />
 
-        {/* Everything below is held back until the picture has been measured:
-            before that there is no rectangle to hang it on, and marks drawn at
-            the plate's edges would jump to the garment on the next frame. */}
-        {drawn ? (
-          <>
-            {/* Crop marks at the corners of the artwork, the way a plate is
-                registered for print. They say where the garment ends, which a
-                cut-out on a plain ground otherwise never does. */}
-            <span className={`${styles.crop} ${styles.cropTL}`} />
-            <span className={`${styles.crop} ${styles.cropTR}`} />
-            <span className={`${styles.crop} ${styles.cropBL}`} />
-            <span className={`${styles.crop} ${styles.cropBR}`} />
+          {/* Crop marks at the corners, the way a plate is registered for
+              print: two sides of a corner each, held off the artwork so they
+              mark it without touching it. */}
+          <span className={`${styles.crop} ${styles.cropTL}`} />
+          <span className={`${styles.crop} ${styles.cropTR}`} />
+          <span className={`${styles.crop} ${styles.cropBL}`} />
+          <span className={`${styles.crop} ${styles.cropBR}`} />
+        </div>
 
-            {/* Dimension lines, the way a spec sheet carries a measurement:
-                ticked at both ends and labelled on the line itself. */}
-            <div className={styles.spanHeight}>
-              <span className={styles.spanLabelVertical}>54 cm</span>
-            </div>
-            <div className={styles.spanWidth}>
-              <span className={styles.spanLabel}>58 cm</span>
-            </div>
-
-            <figcaption className={styles.caption}>Fig. 01 — size 38, laid flat</figcaption>
-          </>
-        ) : null}
+        <figcaption className={styles.caption}>Fig. 01 — comfort range, size 38</figcaption>
       </figure>
 
       <div className={styles.sheet}>

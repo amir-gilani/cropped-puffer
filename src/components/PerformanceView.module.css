@@ -11,143 +11,47 @@
   min-height: 0;
 }
 
-/* --- the drawing ------------------------------------------------------- */
+/* --- the plate ---------------------------------------------------------- */
 
 .plate {
   position: relative;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(26px, 3.4vh, 42px);
   height: 100%;
-  /* A grid item's automatic minimum is its content's own size, and this one
-     contains a 1120px image -- without these the column refuses to be narrower
-     than the photograph and pushes the sheet off the screen. */
+  /* A grid item's automatic minimum is its content's own size, so without these
+     the column refuses to shrink past the graphic and pushes the sheet off the
+     screen. */
   min-height: 0;
   min-width: 0;
   margin: 0;
-  /* Room on the left and underneath for the dimension lines to live in. */
-  padding: 0 0 clamp(28px, 5vh, 48px) clamp(34px, 5vw, 64px);
+  padding: 0 clamp(16px, 2vw, 30px);
 }
 
-.jacket {
-  /* Capped rather than filling the column. The artwork is 1120px wide, so at
-     460 CSS pixels even a 2x screen is downscaling it -- and a downscale is
-     always the sharp direction. */
-  max-width: min(100%, 460px);
-  max-height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 18px 26px var(--shadow));
-  transition: filter 700ms ease 150ms;
-  user-select: none;
-}
-
-/* Both dimension lines are ticked at their ends by the same means: a border on
-   each side of a one-pixel bar, drawn with pseudo-elements. */
-.spanWidth,
-.spanHeight {
-  position: absolute;
-  background: color-mix(in srgb, var(--text) 26%, transparent);
-  transition: background-color 700ms ease 150ms;
-}
-
-.spanWidth::before,
-.spanWidth::after,
-.spanHeight::before,
-.spanHeight::after {
-  content: '';
-  position: absolute;
-  background: color-mix(in srgb, var(--text) 40%, transparent);
-  transition: background-color 700ms ease 150ms;
-}
-
-/* Hung off the picture, not off the plate: `--dx/--dy/--dw/--dh` are the
-   rectangle the artwork is actually drawn in, measured in the component. Along
-   the plate's edges instead, as these were, a dimension line reads as a border
-   round the page rather than as the width of a coat. */
-.spanWidth {
-  left: var(--dx);
-  width: var(--dw);
-  /* Well clear of the hem: the measured rectangle is the picture's, and the
-     sleeves hang almost to its bottom edge, so a line set tight against it
-     looks like it is touching the garment. */
-  top: calc(var(--dy) + var(--dh) + clamp(26px, 3.4vh, 40px));
-  height: 1px;
-  transform-origin: left center;
-}
-
-.spanWidth::before,
-.spanWidth::after {
-  top: -4px;
-  width: 1px;
-  height: 9px;
-}
-
-.spanWidth::before {
-  left: 0;
-}
-
-.spanWidth::after {
-  right: 0;
-}
-
-.spanHeight {
-  left: calc(var(--dx) - clamp(18px, 2.4vw, 32px));
-  top: var(--dy);
-  height: var(--dh);
-  width: 1px;
-  transform-origin: center top;
-}
-
-.spanHeight::before,
-.spanHeight::after {
-  left: -4px;
-  height: 1px;
-  width: 9px;
-}
-
-.spanHeight::before {
-  top: 0;
-}
-
-.spanHeight::after {
-  bottom: 0;
-}
-
-/* On the line rather than beside it, with the page colour behind so the rule
-   appears to pass through the text. */
-.spanLabel,
-.spanLabelVertical {
-  position: absolute;
-  background: var(--bg);
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  transition: color 700ms ease 150ms, background-color 700ms ease 150ms;
-}
-
-.spanLabel {
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  padding: 0 7px;
-}
-
-.spanLabelVertical {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 7px 0;
-  writing-mode: vertical-rl;
+/* The artwork's own box, and the thing the crop marks register. When a
+   photograph stood here this rectangle could not be written in CSS at all: an
+   `object-fit: contain` image draws smaller than the element holding it, so the
+   fitted rect had to be measured in JS on every resize and handed back as four
+   custom properties before a single mark could be placed. A graphic that sizes
+   itself is its own box. */
+.field {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 300px;
+  height: min(100%, 470px);
+  min-height: 0;
 }
 
 /* --- registration and caption ------------------------------------------ */
 
 /* Crop marks at the corners of the artwork, the way a plate is registered for
-   print: two sides of a corner each, held off the picture so they mark it
-   without touching it. They give a cut-out on a plain ground the edges it
-   otherwise has none of. */
+   print: two sides of a corner each, held off it so they mark it without
+   touching it. They give a graphic on a plain ground the edges it otherwise has
+   none of. */
 .crop {
   position: absolute;
   width: 11px;
@@ -159,22 +63,22 @@
 
 .cropTL,
 .cropBL {
-  left: calc(var(--dx) - 9px);
+  left: -13px;
 }
 
 .cropTR,
 .cropBR {
-  left: calc(var(--dx) + var(--dw) - 2px);
+  right: -13px;
 }
 
 .cropTL,
 .cropTR {
-  top: calc(var(--dy) - 9px);
+  top: -13px;
 }
 
 .cropBL,
 .cropBR {
-  top: calc(var(--dy) + var(--dh) - 2px);
+  bottom: -13px;
 }
 
 .cropTL {
@@ -197,12 +101,11 @@
   border-right-width: 1px;
 }
 
-/* The plate's own line of type, under the width it belongs to and ranged with
-   the left edge of the picture. */
+/* The plate's own line of type, ranged with the left edge of the artwork. */
 .caption {
-  position: absolute;
-  left: var(--dx);
-  top: calc(var(--dy) + var(--dh) + clamp(44px, 5.6vh, 62px));
+  align-self: center;
+  width: 100%;
+  max-width: 340px;
   margin: 0;
   font-size: 8px;
   font-weight: 700;
@@ -350,28 +253,6 @@
     height: auto;
   }
 
-  .jacket {
-    max-height: 34vh;
-  }
-
-  /* Stacked, the plate has no padding under it to drop into -- anything hung
-     much below the picture runs into the sheet's first line -- so both stay
-     close to the hem here. */
-  .spanWidth {
-    top: calc(var(--dy) + var(--dh) + 14px);
-  }
-
-  .caption {
-    top: calc(var(--dy) + var(--dh) + 28px);
-  }
-
-  /* The height line needs a margin beside the garment that a narrow screen
-     does not have. The width line and the caption sit under the picture, where
-     there is still room. */
-  .spanHeight {
-    display: none;
-  }
-
   .sheet {
     max-width: none;
   }
@@ -387,32 +268,14 @@
 
 /* Held back until the section is in view, then run once. Only transform and
    opacity, so the compositor can do all of it without touching layout. */
-.spanHeight,
-.spanWidth,
 .figure,
 .crop,
 .caption {
   opacity: 0;
 }
 
-.spanHeight {
-  transform: scaleY(0);
-}
-
-.spanWidth {
-  transform: scaleX(0);
-}
-
 .figure {
   transform: translateY(12px);
-}
-
-.shown .spanHeight {
-  animation: growDown 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.shown .spanWidth {
-  animation: growAcross 420ms cubic-bezier(0.16, 1, 0.3, 1) 60ms forwards;
 }
 
 .shown .figure {
@@ -420,8 +283,8 @@
   animation-delay: calc(60ms + var(--cell) * 40ms);
 }
 
-/* The plate registers itself first, then measures, then annotates: crop marks,
-   dimension lines, leader, label, caption. */
+/* The plate registers itself first, then captions itself. The graphic between
+   them runs on its own clock -- see ThermalScale.module.css. */
 .shown .crop {
   animation: appear 300ms ease-out forwards;
 }
@@ -442,23 +305,9 @@
   animation: appear 400ms ease-out 780ms forwards;
 }
 
-@keyframes growDown {
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-}
-
 @keyframes appear {
   to {
     opacity: 1;
-  }
-}
-
-@keyframes growAcross {
-  to {
-    opacity: 1;
-    transform: scaleX(1);
   }
 }
 
@@ -472,8 +321,6 @@
 /* Nothing to reveal for someone who asked not to be moved: everything simply
    starts where it ends up. */
 @media (prefers-reduced-motion: reduce) {
-  .spanHeight,
-  .spanWidth,
   .figure,
   .crop,
   .caption {

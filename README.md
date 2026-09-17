@@ -32,8 +32,16 @@ lighting and the price all follow the garment.
 | **Corners** | The arrow control bottom-left, the next colourway's thumbnail bottom-right. They mirror each other: what you press, and what it brings in. |
 
 Below the first screen are two more full-height sections — a specification
-plate with dimension lines drawn onto the garment, and an about page. The page
-scrolls one section per gesture rather than freely.
+plate and an about page. The page scrolls one section per gesture rather than
+freely.
+
+The specification screen carries no picture of the jacket, deliberately. It used
+to: a photograph registered with crop marks and measured with dimension lines.
+It was the weakest thing on the site — the first screen shows the garment
+better, and a photograph says nothing at all about performance, which is what
+that screen is for. In its place the headline claim is drawn as the range it
+actually is: one measure against one scale, filled in the colourway's own
+colour, so the screen still answers which jacket you are looking at.
 
 ## The swap
 
