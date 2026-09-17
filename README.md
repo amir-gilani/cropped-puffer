@@ -21,17 +21,7 @@ that any host will serve as-is.
 
 _Recording of the colourway swap — to come._
 
-<!-- Put the recording at docs/demo.gif, then delete this comment and the line
-     above, and uncomment the line below.
-
-     It has to be a GIF to play inline from a path like this: GitHub will not
-     play a .mov or .mp4 referenced as an image. The alternative is to drag the
-     video onto an issue or release, which uploads it and gives back a
-     user-images.githubusercontent.com URL that does play inline.
-
-     Keep it under about 10MB, or the README gets slow to open on a phone. -->
-
-<!-- ![The colourway swap](docs/demo.gif) -->
+<img width="800" height="358" alt="IMG_7339-ezgif com-video-to-gif-converter" src="https://github.com/user-attachments/assets/b7306b88-35d4-4fff-87a1-30040f5370b3" />
 
 ---
 
