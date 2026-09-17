@@ -3,7 +3,7 @@
 A single-page storefront for one jacket in five colourways. No routing, no
 backend — the whole thing is one screen driven by React state.
 
-![The storefront in four of its five colourways](docs/preview.jpg)
+![The storefront in two of its five colourways, Gym Red and Coconut Milk, showing how the background, the lighting and the price all follow the garment](docs/preview.jpg)
 
 The interesting part is not the shop. It is that every transition is measured
 from the live layout at the moment it starts, so nothing in it breaks when the
